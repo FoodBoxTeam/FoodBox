@@ -1,0 +1,52 @@
+﻿@page "/contact"
+
+<PageTitle>Contact</PageTitle>
+
+<h3>Please Contact Us!</h3>
+
+<!--Where should we put own own phone number? Email?-->
+
+@* <EditForm> *@
+    @* <DataAnnotationsValidator/> *@
+<form>
+
+    <div class="mb-3">
+        <label for="name">Name</label>
+        <input id="name" type="text"/>
+    </div>
+    <div class="mb-3">
+        <label for="addres">Email Address</label>
+        <input id="address" type="email"/>
+        @* <ValidationMessage For="() => Location.Name"/> *@
+    </div>
+    <div class="mb-3">
+        <label for="phoneNumber">Phone Number</label>
+        <input id="phone" type="tel"/>
+    </div>
+    <div class="mb-3">
+        <label for="date">Date Of Visit</label>
+        <input id="date" type="date"/>
+    </div>
+    <div class="mb-3">
+        <label for="reason">Reason for Contact</label>
+        <select id="reason">
+            @foreach(string r in reasons)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+
+    </div>
+    <div class="mb-3">
+        <label for="message">Message</label>
+        <input id="message" type="text" />
+    </div>
+    <button>Submit</button>
+</form>
+@* </EditForm> *@
+
+@code {
+    private string[] reasons = new string[] {"The Food I recieved was not my order", "Employee treated me poorly",
+        "I found ... in my food", "Unhappy with delivery", "Food made me sick", "Unhappy with waiting times",
+        "I really enjoyed ...", "Can you start making ...", "Other" };
+}

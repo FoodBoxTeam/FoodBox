@@ -1,0 +1,80 @@
+﻿@page "/location"
+@inject IDbContextFactory<FoodBoxDB> contextFactory
+
+<PageTitle>Location</PageTitle>
+
+<h3>Our Locations</h3>
+
+<!--We want pictures!!!-->
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">City</th>
+            <th scope="col">Street Address</th>
+            <th scope="col">State</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Provo FoodBox SuperStore</td>
+            <td>Provo</td>
+            <td>12 s 560 e</td>
+            <td>Utah</td>
+        </tr>
+        <tr>
+            <td>Ephraim Cooking Place</td>
+            <td>Ephriam</td>
+            <td>130 s Main</td>
+            <td>Utah</td>
+        </tr>
+    </tbody>
+</table>
+
+@* @if(locations is not null)
+{
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">City</th>
+                <th scope="col">Street Address</th>
+                <th scope="col">State</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(Location l in locations)
+            {
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+else
+{
+    <p>Loading...</p>
+}
+ *@
+
+@code {
+    /*
+     
+    List<Location> locations { get; set; }
+
+    protected override async Task OnInitialize()
+    {
+        var context = contextFactory.CreateDbContext();
+        await context.Location.ToListAsync();
+        //db here
+
+    }
+
+     */
+}
