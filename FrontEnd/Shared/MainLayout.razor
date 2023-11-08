@@ -3,21 +3,31 @@
 <PageTitle>FrontEnd</PageTitle>
 
 <div class="page">
-    <div class="sidebar">
+    @* <div class="sidebar">
         <NavMenu />
-    </div>
+    </div> *@
 
     <main>
-        <div class="top-row px-4">
+        <div class="top-row justify-content-center px-4">
+            <img class="logo" src="images/logobetterbackground.png" />
             <a href="about" target="_blank">About</a>
+            <a href="menu" target="_blank">Menu</a>
+            <a href="order" target="_blank">Order</a>
             <LoginDisplay />
         </div>
 
-        <article class="content px-4">
+        <article class="body">
             @Body
         </article>
         <footer>
-            This is the footer
+            <div class="top-row justify-content-center px-4">
+                <a href="order-history" target="_blank">Order History</a>
+                <a href="policies" target="_blank">Policies</a>
+                <a href="locations" target="_blank">Locations</a>
+                <a href="contact" target="_blank">Contact</a>
+                <a href="my_favorites" target="_blank">My Favorites</a>
+                <a href="our_favorites" target="_blank">Our Favorites</a>
+            </div>
         </footer>
     </main>
 </div>
