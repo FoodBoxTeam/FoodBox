@@ -179,6 +179,11 @@ public partial class FoodBoxDB : IdentityDbContext
 
             entity.ToTable("purchase_transaction");
 
+            entity.Property(e => e.AmountPaid)
+                .HasColumnName("amount_paid")
+                .HasColumnType("money");
+
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreditCardNumber)
                 .HasMaxLength(16)
