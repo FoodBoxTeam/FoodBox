@@ -6,7 +6,10 @@
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
-        <a href="Identity/Account/Login">Log in</a>
+        <NavLink class="nav-link" href="Identity/Account/Login" Match="NavLinkMatch.All">
+            <span class="oi oi-person" aria-hidden="true"></span> Register/Login
+        </NavLink>
+        @* <a href="Identity/Account/Login">Register/Login</a> *@
+        @* BagCheck BagCheckFill PersonArmsUp Person PersonCircle PersonCheckFill account-login*@
     </NotAuthorized>
 </AuthorizeView>
