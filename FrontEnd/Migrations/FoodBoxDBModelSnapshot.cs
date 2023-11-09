@@ -20,9 +20,6 @@ namespace FrontEnd.Migrations
                 .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_catalog", "azure");
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_catalog", "pgaadauth");
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_cron");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("FrontEnd.Data.Coupon", b =>
