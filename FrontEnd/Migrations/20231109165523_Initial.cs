@@ -12,11 +12,6 @@ namespace FrontEnd.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:PostgresExtension:pg_catalog.azure", ",,")
-                .Annotation("Npgsql:PostgresExtension:pg_catalog.pgaadauth", ",,")
-                .Annotation("Npgsql:PostgresExtension:pg_cron", ",,");
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new

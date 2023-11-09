@@ -43,10 +43,10 @@ public partial class FoodBoxDB : IdentityDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder
+        /*modelBuilder
             .HasPostgresExtension("pg_catalog", "azure")
             .HasPostgresExtension("pg_catalog", "pgaadauth")
-            .HasPostgresExtension("pg_cron");
+            .HasPostgresExtension("pg_cron");*/
 
         modelBuilder.Entity<Coupon>(entity =>
         {

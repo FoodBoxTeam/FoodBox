@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FrontEnd.Migrations
 {
     [DbContext(typeof(FoodBoxDB))]
-    [Migration("20231109011939_Initial")]
+    [Migration("20231109165523_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -23,9 +23,6 @@ namespace FrontEnd.Migrations
                 .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_catalog", "azure");
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_catalog", "pgaadauth");
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_cron");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("FrontEnd.Data.Coupon", b =>
