@@ -2,35 +2,105 @@
 
 <PageTitle>Contact</PageTitle>
 
-<h3>Please Contact Us!</h3>
+@*<h3>Please Contact Us!</h3>*@
 
 <!--Where should we put own own phone number? Email?-->
 
 @* <EditForm> *@
     @* <DataAnnotationsValidator/> *@
 <form>
+    <div class="background">
+        <div class="container">
+            <div class="screen">
+                
+                <div class="screen-body">
+                    <div class="screen-body-item left">
+                        <div class="app-title">
+                            <span>CONTACT</span>
+                            <span>US</span>
+                        </div>
+                        <div class="app-contact">CONTACT INFO : +1 314 928 0595</div>
+                    </div>
+                    <div class="screen-body-item">
+                        <div class="app-form">
+
+                            <div class="app-form-group">
+                                <input class="app-form-control" placeholder="NAME" id="name" type="text" />
+                            </div>
+                            <div class="app-form-group">
+                                <input class="app-form-control" placeholder="EMAIL" id="address" type="email">
+                                @* <ValidationMessage For="() => Location.Name"/> *@
+                            </div>
+                            <div class="app-form-group">
+                                <input class="app-form-control" placeholder="PHONE NUMBER" id="phone" type="tel" />
+                            </div>
+                            <div class="app-form-group">
+                                <input for="date" placeholder="DATE OF VISIT" id="date" type="date" />
+                            </div>
+
+
+                            <div class="app-form-group">
+                                
+                                @*<label class="app-form-group" for="reason">Reason for Contact</label>*@
+                                <select id="reason">
+                                    @foreach (string r in reasons)
+                                    {
+                                        <option value="@r">@r</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="app-form-group message">
+                                <input Class="app-form-control" placeholder="MESSAGE" id="message" type="text" />
+                            </div>
+                            <div class="app-form-group buttons">
+                                <button class="app-form-button">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@* </EditForm> *@
+
+@code {
+    private string[] reasons = new string[] {"The Food I recieved was not my order", "Employee treated me poorly",
+        "I found ... in my food", "Unhappy with delivery", "Food made me sick", "Unhappy with waiting times",
+        "I really enjoyed ...", "Can you start making ...", "Other" };
+}
+
+
+
+
+
+
+
+
+
+@*<form>
 
     <div class="mb-3">
         <label for="name">Name</label>
-        <input id="name" type="text"/>
+        <input id="name" type="text" />
     </div>
     <div class="mb-3">
         <label for="addres">Email Address</label>
-        <input id="address" type="email"/>
-        @* <ValidationMessage For="() => Location.Name"/> *@
+        <input id="address" type="email" />
+       
     </div>
     <div class="mb-3">
         <label for="phoneNumber">Phone Number</label>
-        <input id="phone" type="tel"/>
+        <input id="phone" type="tel" />
     </div>
     <div class="mb-3">
         <label for="date">Date Of Visit</label>
-        <input id="date" type="date"/>
+        <input id="date" type="date" />
     </div>
     <div class="mb-3">
         <label for="reason">Reason for Contact</label>
         <select id="reason">
-            @foreach(string r in reasons)
+            @foreach (string r in reasons)
             {
                 <option value="@r">@r</option>
             }
@@ -42,11 +112,4 @@
         <input id="message" type="text" />
     </div>
     <button>Submit</button>
-</form>
-@* </EditForm> *@
-
-@code {
-    private string[] reasons = new string[] {"The Food I recieved was not my order", "Employee treated me poorly",
-        "I found ... in my food", "Unhappy with delivery", "Food made me sick", "Unhappy with waiting times",
-        "I really enjoyed ...", "Can you start making ...", "Other" };
-}
+</form>*@
