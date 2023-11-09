@@ -78,3 +78,13 @@ a, .btn-link {
     color: black;
     text-decoration: none;
 }
+
+.nav-link:focus{
+    color: white;
+    opacity: 150%;
+    border: solid;
+    border-block-color: darkgreen;
+    border-left-color: lightgreen;
+    border-right-color: lightgreen;
+    padding: 10px;
+}
