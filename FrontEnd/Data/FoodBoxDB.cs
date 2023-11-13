@@ -157,6 +157,10 @@ public partial class FoodBoxDB : IdentityDbContext
 
             entity.ToTable("purchase_item");
 
+            entity.Property(e => e.ActualPrice)
+                .HasColumnName("actualprice")
+                .HasColumnType("money");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ItemId).HasColumnName("item_id");
             entity.Property(e => e.PurchaseId).HasColumnName("purchase_id");
@@ -182,7 +186,6 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.Property(e => e.AmountPaid)
                 .HasColumnName("amount_paid")
                 .HasColumnType("money");
-
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreditCardNumber)
