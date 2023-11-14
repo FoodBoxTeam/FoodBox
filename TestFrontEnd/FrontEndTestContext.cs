@@ -25,7 +25,7 @@ public class FrontEndTestContext : TestContext, IAsyncLifetime
             .Build();
 
         Services.AddDbContextFactory<FoodBoxDB>(options => options.UseNpgsql(_dbContainer.GetConnectionString()));
-        Services.AddScoped<WeatherForecastService>();
+       /* Services.AddScoped<WeatherForecastService>();*/
     }
 
     public async Task InitializeAsync()
