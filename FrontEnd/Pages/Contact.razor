@@ -6,9 +6,9 @@
 
 <!--Where should we put own own phone number? Email?-->
 
-@* <EditForm> *@
-    @* <DataAnnotationsValidator/> *@
-<form>
+<EditForm Model="contact">
+    <DataAnnotationsValidator/>
+
     <div class="background">
         <div class="container">
             <div class="screen">
@@ -32,7 +32,7 @@
                                 @* <ValidationMessage For="() => Location.Name"/> *@
                             </div>
                             <div class="app-form-group">
-                                <input class="app-form-control" placeholder="PHONE NUMBER" id="phone" type="tel" />
+                                <input class="app-form-control" placeholder="PHONE NUMBER" id="Phone" type="tel" />
                             </div>
                             <div class="app-form-group">
                                 <input for="date" placeholder="DATE OF VISIT" id="date" type="date" />
@@ -61,13 +61,16 @@
             </div>
         </div>
     </div>
-</form>
-@* </EditForm> *@
+
+</EditForm>
 
 @code {
     private string[] reasons = new string[] {"The Food I recieved was not my order", "Employee treated me poorly",
         "I found ... in my food", "Unhappy with delivery", "Food made me sick", "Unhappy with waiting times",
         "I really enjoyed ...", "Can you start making ...", "Other" };
+
+    CustomerContact contact { get; set; } = new();
+
 }
 
 
