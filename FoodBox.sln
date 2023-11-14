@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontEnd", "FrontEnd\FrontE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontEndTests", "TestFrontEnd\FrontEndTests.csproj", "{B6C87AAB-1C46-49AA-BF83-05A8CFBD533A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FBAPI", "FBAPI\FBAPI.csproj", "{5A7B1A7B-A9F5-409B-856F-2C0ED09BF489}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FBAPI", "FBAPI\FBAPI.csproj", "{5A7B1A7B-A9F5-409B-856F-2C0ED09BF489}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
