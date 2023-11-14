@@ -1,0 +1,38 @@
+﻿@page "/orderingitem/{Id:int}"
+@using FrontEnd.Data;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory;
+
+@if (menuItems is not null)
+{
+    <h3>Ordering Item</h3>
+    @menuItems[Id].ItemName
+}
+else
+{
+    <div class="alert alert-danger">Menu Items were not found.</div>
+}
+
+@code {
+    public List<Item> menuItems { get; set; }
+    public Item menuItem { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    public string ItemName { get; set; } = null!;
+    public string? Description { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItems = await context.Items.ToListAsync();
+        await refreshAsync();
+    }
+    async Task refreshAsync()
+    {
+
+    }
+    protected async Task OnParameterSetAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == Id);
+    }
+}

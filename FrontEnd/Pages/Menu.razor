@@ -1,132 +1,173 @@
 ﻿@page "/menu"
+@using FrontEnd.Data;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory;
 
 <PageTitle>Menu</PageTitle>
 
-<!-- order_area_start -->
-<div class="order_area">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-12">
-                <div class="section_title mb-70">
-                    <h3>Menu</h3>
-                    <p></p>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-1.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Mediterranean Salad</a></h3>
-                        <p>
-                            Naan | Peas | Olives | Peppers | Mixed Vegetables <br>
-                            Delicious Salad! <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+@if (menuItems is not null && restaurants is not null)
+{
+    @* <InputSelect id="ShiftId" class="form-control"
+        @bind-Value="@restaurant.Id">
+        @foreach (var rt in restaurants)
+            {
+                <option value="@rt.Id">@rt.Location</option>
+            }
+    </InputSelect> *@
+    <!-- order_area_start -->
+    <div class="order_area">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="section_title mb-70">
+                        <h3>Menu</h3>
+                        <p></p>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-2.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+            <div class="row">
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-1.png" alt="">
+                            <div class="order_prise">
+                                <span>@* need to add price here from resturant price *@</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Sirloin Steak</a></h3>
-                        <p>
-                            Medium Rare Steak | Or Your Choice Cooked <br>
-                            Grilled Tomatoes | Other Veggies<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/0">@menuItems[0].ItemName</a></h3>
+                            <p>
+                                Naan | Peas | Olives | Peppers | Mixed Vegetables <br>
+                                Delicious Salad! <br>
+                            </p>
+                            <a href="orderingitem/0" class="boxed_btn">Add to Box!</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-3.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-2.png" alt="">
+                            <div class="order_prise">
+                                <span>10.00</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Chicken Shawarma</a></h3>
-                        <p>
-                            Grilled Chicken | Falafel <br>
-                            Mixed Vegetable <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/1">@menuItems[1].ItemName</a></h3>
+                            <p>
+                                Medium Rare Steak | Or Your Choice Cooked <br>
+                                Grilled Tomatoes | Other Veggies<br>
+                            </p>
+                            <a href="orderingitem/1" class="boxed_btn">Add to Box!</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-4.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-3.png" alt="">
+                            <div class="order_prise">
+                                <span>10.00</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Oven Roasted Salmon</a></h3>
-                        <p>
-                            Perfectly Roasted Salmon! <br>
-                            Salad On The Side! <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/2">@menuItems[2].ItemName</a></h3>
+                            <p>
+                                Grilled Chicken | Falafel <br>
+                                Mixed Vegetable <br>
+                            </p>
+                            <a href="orderingitem/2" class="boxed_btn">Add to Box!</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-5.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-4.png" alt="">
+                            <div class="order_prise">
+                                <span>10.00</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Blackberry Dreamsicle</a></h3>
-                        <p>
-                            Perfectly Frozen Ice Cream <br>
-                            With Blackberries On The Side<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/3">@menuItems[3].ItemName</a></h3>
+                            <p>
+                                Perfectly Roasted Salmon! <br>
+                                Salad On The Side! <br>
+                            </p>
+                            <a href="orderingitem/3" class="boxed_btn">Add to Box!</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-6.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-5.png" alt="">
+                            <div class="order_prise">
+                                <span>10.00</span>
+                            </div>
+                        </div>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/4">@menuItems[4].ItemName</a></h3>
+                            <p>
+                                Perfectly Frozen Ice Cream <br>
+                                With Blackberries On The Side<br>
+                            </p>
+                            <a href="orderingitem/4" class="boxed_btn">Add to Box!</a>
                         </div>
                     </div>
-                    <div class="order_info">
-                        <h3><a href="#">Sourdough Bread</a></h3>
-                        <p>
-                            Perfectly Baked Sourdough<br>
-                            Salt and Grain On The Side<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="single_order">
+                        <div class="order_thumb">
+                            <img src="images/favoriteorders/order-6.png" alt="">
+                            <div class="order_prise">
+                                <span>10.00</span>
+                            </div>
+                        </div>
+                        <div class="order_info">
+                            <h3><a href="orderingitem/5">@menuItems[5].ItemName</a></h3>
+                            <p>
+                                Perfectly Baked Sourdough<br>
+                                Salt and Grain On The Side<br>
+                            </p>
+                            <a href="orderingitem/5" class="boxed_btn">Add to Box!</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- order_area_end -->
+    <!-- order_area_end -->
+}
+else
+{
+    <div class="alert alert-danger">Menu Items were not found.</div>
+}
 
 @code {
+    public List<Item> menuItems { get; set; }
+    public Item menuItem { get; set; }
+    public List<Restaurant> restaurants { get; set; }
+    public Restaurant restaurant { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    public string ItemName { get; set; } = null!;
+    public string? Description { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItems = await context.Items.ToListAsync();
+        restaurants = await context.Restaurants.ToListAsync();
+        await refreshAsync();
+    }
+    async Task refreshAsync()
+    {
+
+    }
+    protected async Task OnParameterSetAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == Id);
+        restaurant = await context.Restaurants.FirstOrDefaultAsync(it => it.Id == Id);
+    }
 }
