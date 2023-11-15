@@ -6,16 +6,20 @@
 
 @if (menuItems is not null && restaurants is not null)
 {
-    @* <InputSelect id="ShiftId" class="form-control"
-        @bind-Value="@restaurant.Id">
-        @foreach (var rt in restaurants)
-            {
-                <option value="@rt.Id">@rt.Location</option>
-            }
-    </InputSelect> *@
+   <div class="container">
+            Please choose restaurant location.
+            <InputSelect id="restaurant" class="form-control"
+            @bind-Value="@selectedRestaurant">
+                @foreach (var rt in restaurants)
+                {
+                    <option value="@rt.Id">@rt.RestaurantName</option>
+                }
+            </InputSelect>
+   </div>
     <!-- order_area_start -->
     <div class="order_area">
         <div class="container">
+            
             <div class="row">
                 <div class="col-xl-12">
                     <div class="section_title mb-70">
@@ -30,7 +34,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-1.png" alt="">
                             <div class="order_prise">
-                                <span>@* need to add price here from resturant price *@</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -48,7 +52,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-2.png" alt="">
                             <div class="order_prise">
-                                <span>10.00</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -66,7 +70,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-3.png" alt="">
                             <div class="order_prise">
-                                <span>10.00</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -84,7 +88,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-4.png" alt="">
                             <div class="order_prise">
-                                <span>10.00</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -102,7 +106,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-5.png" alt="">
                             <div class="order_prise">
-                                <span>10.00</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -120,7 +124,7 @@
                         <div class="order_thumb">
                             <img src="images/favoriteorders/order-6.png" alt="">
                             <div class="order_prise">
-                                <span>10.00</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).ToList()[0].Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -145,9 +149,13 @@ else
 
 @code {
     public List<Item> menuItems { get; set; }
+    public List<RestaurantItem> restaurantItems {get; set;}
     public Item menuItem { get; set; }
     public List<Restaurant> restaurants { get; set; }
     public Restaurant restaurant { get; set; }
+    public int selectedRestaurant { get; set; } = 1;
+    public List<Restaurant> restaurantsAndItems { get; set; }
+
     [Parameter]
     public int Id { get; set; }
     public string ItemName { get; set; } = null!;
@@ -158,6 +166,10 @@ else
         using var context = ContextFactory.CreateDbContext();
         menuItems = await context.Items.ToListAsync();
         restaurants = await context.Restaurants.ToListAsync();
+        restaurantItems = await context.RestaurantItems.ToListAsync();
+        restaurantsAndItems = await context.Restaurants
+            .Include(ri => ri.RestaurantItems)
+            .ToListAsync();
         await refreshAsync();
     }
     async Task refreshAsync()
