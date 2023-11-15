@@ -11,6 +11,8 @@ public partial class Item
 
     public string? Description { get; set; }
 
+    public string Image { get; set; } = null!;
+
     public virtual ICollection<FavoriteItem> FavoriteItems { get; set; } = new List<FavoriteItem>();
 
     public virtual ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
