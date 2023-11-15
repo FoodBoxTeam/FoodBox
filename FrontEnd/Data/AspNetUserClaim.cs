@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace FrontEnd.Data;
 
-public partial class Customer
+public partial class AspNetUserClaim
 {
     public int Id { get; set; }
 
     public string UserId { get; set; } = null!;
 
-    public int? Points { get; set; }
+    public string? ClaimType { get; set; }
 
-    public virtual ICollection<FavoriteItem> FavoriteItems { get; set; } = new List<FavoriteItem>();
+    public string? ClaimValue { get; set; }
 
     public virtual AspNetUser User { get; set; } = null!;
 }
