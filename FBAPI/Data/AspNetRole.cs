@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FBAPI.Data;
 
-public partial class AspNetRole
+public partial class AspNetRole : IDataObject
 {
     public string Id { get; set; } = null!;
 

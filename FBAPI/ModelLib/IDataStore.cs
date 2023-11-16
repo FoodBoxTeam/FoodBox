@@ -7,4 +7,5 @@ public interface IDataStore
     Task<IDataObject> AddData(IDataObject dataObject);
     Task<IDataObject> UpdateData(IDataObject dataObject);
     Task DeleteDataObj(int id, DataObjectType type);
+    Task<IEnumerable<IDataObject>> GetUserRolesAsync(string id);
 }
