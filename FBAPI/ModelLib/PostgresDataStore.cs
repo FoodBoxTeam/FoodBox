@@ -36,5 +36,19 @@ public class PostgresDataStore : IDataStore
     {
         throw new NotImplementedException();
     }
+
+    public async Task<IEnumerable<IDataObject>> GetUserRolesAsync(string id)
+    {
+        var user = _context.AspNetUserLogins.Single(l => l.ProviderKey == id);
+
+        if (user != null)
+        {
+            return await _context.AspNetRoles.ToListAsync() as IEnumerable<AspNetRole>;
+        }
+        else
+        {
+            throw new Exception("User Token is NOT valid!");
+        }
+    }
 }
 

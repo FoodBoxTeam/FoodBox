@@ -11,5 +11,7 @@ public enum DataObjectType
     PurchaseItem,
     PurchaseTransaction,
     Restaurant,
-    RestaurantItem
+    RestaurantItem,
+    Role,
+    User
 }
