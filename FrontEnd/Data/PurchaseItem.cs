@@ -13,7 +13,7 @@ public partial class PurchaseItem
 
     public int Quantity { get; set; }
 
-    public decimal? Actualprice { get; set; }
+    public decimal? ActualPrice { get; set; }
 
     public virtual Item Item { get; set; } = null!;
 
