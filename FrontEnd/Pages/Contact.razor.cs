@@ -10,7 +10,5 @@ namespace FrontEnd.Pages
         public DateOnly Date { get; set; }
         public string Reason { get; set; }
         public string Message { get; set; }
-
-
     }
 }
