@@ -12,6 +12,4 @@ public partial class Customer
     public int? Points { get; set; }
 
     public virtual ICollection<FavoriteItem> FavoriteItems { get; set; } = new List<FavoriteItem>();
-
-    public virtual AspNetUser User { get; set; } = null!;
 }
