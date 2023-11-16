@@ -1,9 +1,116 @@
 ﻿@page "/order"
+@using FrontEnd.Data;
+@using FrontEnd.Pages.Dto;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory;
+@inject NavigationManager NavigationManager
 
-<PageTitle>OurFavorites</PageTitle>
+<h3>Your Order: </h3>
+@* @if (employees is not null)
+{
 
-<h3>Order here.</h3>
+    <table class="table-striped">
+        <thead>
+            <tr>Id</tr>
+            <tr>Name</tr>
+            <tr>Phone Number</tr>
+            <tr>Email</tr>
+            <tr>Tax Id</tr>
+            <tr>Base Hourly Rate</tr>
+        </thead>
+        <tbody>
+
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Id</td>
+                    <td>@employee.EeName</td>
+                    <td>@employee.EePhone</td>
+                    <td>@employee.EeEmail</td>
+                    <td>@employee.Taxid</td>
+                    <td>@employee.BaseHourlyRate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No employees</p>
+} *@
 
 @code {
+    public List<Item> menuItems { get; set; }
+    public List<RestaurantItem> restaurantItems { get; set; }
+    public Item menuItem { get; set; }
+    public List<Restaurant> restaurants { get; set; }
+    public Restaurant restaurant { get; set; }
+    public int selectedRestaurant { get; set; } = 1;
+    public List<Restaurant> restaurantsAndItems { get; set; }
+    public decimal price { get; set; }
+    public EventCallback<bool> OnSubmit { get; set; }
+    public EventCallback OnCancel { get; set; }
+    private bool IsBusy { get; set; }
 
+    // [Parameter]
+    // public int SelectedItemId { get; set; }
+    // [Parameter]
+    // public int RestaurantId { get; set; }
+    public string ItemName { get; set; } = null!;
+    public string? Description { get; set; }
+    public int quantityItem { get; set; } = 1;
+    private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    public ListOrderingItemDto listOrderingItemDto { get; set; } 
+
+    // private async Task HandleValidSubmit()
+    // {
+    //     if (OnSubmit.HasDelegate)
+    //     {
+    //         await OnSubmit.InvokeAsync(true);
+    //     }
+    // }
+    // private async Task HandleInvalidSubmit()
+    // {
+    //     if (OnSubmit.HasDelegate)
+    //     {
+    //         await OnSubmit.InvokeAsync(false);
+    //     }
+    // }
+    // private async Task HandleCancel()
+    // {
+    //     if (OnCancel.HasDelegate)
+    //     {
+    //         await OnCancel.InvokeAsync();
+    //     }
+    // }
+    // private async Task HandleSubmit()
+    // {
+    //     selectedItemOrder.ItemId = SelectedItemId;
+    //     selectedItemOrder.Quantity = quantityItem;
+    //     selectedItemOrder.ItemPrice = quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).ToList()[0].Price;
+    //     selectedItemOrders.Add(selectedItemOrder);
+    //     NavigateToOrderPage();
+    // }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItems = await context.Items.ToListAsync();
+        restaurants = await context.Restaurants.ToListAsync();
+        restaurantItems = await context.RestaurantItems.ToListAsync();
+        restaurantsAndItems = await context.Restaurants
+            .Include(ri => ri.RestaurantItems)
+            .ToListAsync();
+        // listOrderingItemDto = await listOrderingItemDto.list[0].ItemPrice;
+    }
+
+    protected async Task OnParameterSetAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        // menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
+        // restaurant = await context.Restaurants.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
+    }
+    private void NavigateToOrderPage()
+    {
+        NavigationManager.NavigateTo($"/order");
+    }
 }

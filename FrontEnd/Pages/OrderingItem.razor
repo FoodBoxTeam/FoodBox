@@ -1,38 +1,134 @@
-﻿@page "/orderingitem/{Id:int}"
+﻿@page "/orderingitem/{SelectedItemId:int}/{RestaurantId:int}"
 @using FrontEnd.Data;
+@using FrontEnd.Pages.Dto;
+@using FrontEnd.Pages
 @inject IDbContextFactory<FoodBoxDB> ContextFactory;
+@inject NavigationManager NavigationManager
 
-@if (menuItems is not null)
+@if (menuItems is not null && restaurantItems is not null)
 {
-    <h3>Ordering Item</h3>
-    @menuItems[Id].ItemName
+    <EditForm Model="selectedItemOrder">
+        <DataAnnotationsValidator />
+        <div class="background">
+            <div class="container">
+                <div class="screen">
+
+                    <div class="screen-body">
+                        <div class="screen-body-item left">
+                            <div class="app-title">
+                                <span>@menuItems[SelectedItemId].ItemName</span>
+                            </div>
+                            <div class="app-contact">CONTACT INFO : +1 314 928 0595</div>
+                        </div>
+                        <div class="screen-body-item">
+                            <div class="app-form">
+                                <div class="app-form-group">
+                                    <InputSelect id="quantity" class="form-control"
+                                    @bind-Value="@quantityItem">
+                                        @foreach (int num in quantity)
+                                        {
+                                            <option value="@num">@num</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="app-form-group buttons">
+                                    <button type="submit" class="app-form-button"
+                                            disabled="@IsBusy" @onclick="HandleSubmit">
+                                        Submit
+                                    </button>
+                                    <div>Price: @(quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).ToList()[0].Price)</div>
+                                    <div>itemOrder for testing:</div>
+                                    <div>Id: @selectedItemOrder.ItemId</div>
+                                    <div>Quantity: @selectedItemOrder.Quantity</div>
+                                    <div>Price: @selectedItemOrder.ItemPrice</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </EditForm>
 }
 else
 {
-    <div class="alert alert-danger">Menu Items were not found.</div>
+    <div class="alert alert-danger">Page did not load correctly.</div>
 }
 
 @code {
     public List<Item> menuItems { get; set; }
+    public List<RestaurantItem> restaurantItems { get; set; }
     public Item menuItem { get; set; }
+    public List<Restaurant> restaurants { get; set; }
+    public Restaurant restaurant { get; set; }
+    public int selectedRestaurant { get; set; } = 1;
+    public List<Restaurant> restaurantsAndItems { get; set; }
+    public decimal price { get; set; }
+    public EventCallback<bool> OnSubmit { get; set; }
+    public EventCallback OnCancel { get; set; }
+    private bool IsBusy { get; set; }
+
     [Parameter]
-    public int Id { get; set; }
+    public int SelectedItemId { get; set; }
+    [Parameter]
+    public int RestaurantId { get; set; }
     public string ItemName { get; set; } = null!;
     public string? Description { get; set; }
+    public int quantityItem { get; set; } = 1;
+    private int[] quantity = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    OrderingItemDto selectedItemOrder { get; set; } = new();
+    ListOrderingItemDto listOrderingItem { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(true);
+        }
+    }
+    private async Task HandleInvalidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(false);
+        }
+    }
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+    private async Task HandleSubmit()
+    {
+        selectedItemOrder.ItemId = SelectedItemId;
+        selectedItemOrder.Quantity = quantityItem;
+        selectedItemOrder.ItemPrice = quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).ToList()[0].Price;
+        // listOrderingItem.list.Add(selectedItemOrder); //Work in progress.
+        // NavigateToOrderPage();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
         menuItems = await context.Items.ToListAsync();
-        await refreshAsync();
+        restaurants = await context.Restaurants.ToListAsync();
+        restaurantItems = await context.RestaurantItems.ToListAsync();
+        restaurantsAndItems = await context.Restaurants
+            .Include(ri => ri.RestaurantItems)
+            .ToListAsync();
     }
-    async Task refreshAsync()
-    {
 
-    }
     protected async Task OnParameterSetAsync()
     {
         using var context = ContextFactory.CreateDbContext();
-        menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == Id);
+        menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
+        restaurant = await context.Restaurants.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
+    }
+    private void NavigateToOrderPage()
+    {
+        NavigationManager.NavigateTo($"/order");
     }
 }
