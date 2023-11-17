@@ -16,6 +16,9 @@ namespace FBAPI.Controllers
             _dataStore = dataStore;
         }
 
+        //Post
+
+        //Cache tax rates
         [HttpGet()]
         public async Task<IEnumerable<string>> GetUserRoles([FromBody] string token)
         {

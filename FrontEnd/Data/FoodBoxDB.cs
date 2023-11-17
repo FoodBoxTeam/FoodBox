@@ -107,6 +107,9 @@ public partial class FoodBoxDB : IdentityDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Image)
+                .HasMaxLength(60)
+                .HasColumnName("image");
             entity.Property(e => e.ItemName)
                 .HasMaxLength(50)
                 .HasColumnName("item_name");

@@ -4,7 +4,7 @@
 
 <PageTitle>Menu</PageTitle>
 
-@if (menuItems is not null && restaurants is not null)
+@if (restaurantsAndItems is not null && menuItems is not null)
 {
    <div class="container">
             Please choose restaurant location.
@@ -32,7 +32,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-1.png" alt="">
+                            <img src="Images/favoriteorders/order-1.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).ToList()[0].Price</span>
                             </div>
@@ -50,7 +50,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-2.png" alt="">
+                            <img src="Images/favoriteorders/order-2.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).ToList()[0].Price</span>
                             </div>
@@ -68,7 +68,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-3.png" alt="">
+                            <img src="Images/favoriteorders/order-3.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).ToList()[0].Price</span>
                             </div>
@@ -86,7 +86,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-4.png" alt="">
+                            <img src="Images/favoriteorders/order-4.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).ToList()[0].Price</span>
                             </div>
@@ -104,7 +104,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-5.png" alt="">
+                            <img src="Images/favoriteorders/order-5.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).ToList()[0].Price</span>
                             </div>
@@ -122,7 +122,7 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="images/favoriteorders/order-6.png" alt="">
+                            <img src="Images/favoriteorders/order-6.png" alt="">
                             <div class="order_prise">
                                 <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).ToList()[0].Price</span>
                             </div>
@@ -144,7 +144,7 @@
 }
 else
 {
-    <div class="alert alert-danger">Menu Items were not found.</div>
+    <div>Loading...</div>
 }
 
 @code {
@@ -174,7 +174,8 @@ else
     }
     async Task refreshAsync()
     {
-
+        StateHasChanged();
+        await Task.CompletedTask;
     }
     protected async Task OnParameterSetAsync()
     {

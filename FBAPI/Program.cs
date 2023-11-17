@@ -2,6 +2,14 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 401 un-authorized
+
+// Suposed to work
+// Told google, that me web app is trusted
+// TODO: My api is ALSO trusted
+// Call google in this API
+// Token as JWT
+
 // Add services to the container.
 
 builder.Services.AddControllers();
