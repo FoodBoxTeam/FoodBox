@@ -1,25 +1,28 @@
 ﻿@page "/menu"
 @using FrontEnd.Data;
-@inject IDbContextFactory<FoodBoxDB> ContextFactory;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
 
 <PageTitle>Menu</PageTitle>
 
 @if (restaurantsAndItems is not null && menuItems is not null)
 {
-   <div class="container">
-            Please choose restaurant location.
-            <InputSelect id="restaurant" class="form-control"
+   <div class="container" style="padding-top:3em;">
+        @* <div class="section_title mb-70">
+            <h7>Choose Restaurant Location</h7>
+            <p></p>
+        </div> *@
+        <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Choose Restaurant Location</label>
+        <InputSelect id="restaurant" class="form-select label-large"
             @bind-Value="@selectedRestaurant">
-                @foreach (var rt in restaurants)
+            @foreach (var rt in restaurantsAndItems)
                 {
                     <option value="@rt.Id">@rt.RestaurantName</option>
                 }
-            </InputSelect>
+        </InputSelect>
    </div>
     <!-- order_area_start -->
     <div class="order_area">
         <div class="container">
-            
             <div class="row">
                 <div class="col-xl-12">
                     <div class="section_title mb-70">
@@ -32,9 +35,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-1.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -50,9 +53,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-2.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -68,9 +71,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-3.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -86,9 +89,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-4.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -104,9 +107,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-5.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -122,9 +125,9 @@
                 <div class="col-xl-4 col-md-6">
                     <div class="single_order">
                         <div class="order_thumb">
-                            <img src="Images/favoriteorders/order-6.png" alt="">
+                            <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                             <div class="order_prise">
-                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).ToList()[0].Price</span>
+                                <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Price</span>
                             </div>
                         </div>
                         <div class="order_info">
@@ -148,25 +151,18 @@ else
 }
 
 @code {
-    public List<Item> menuItems { get; set; }
-    public List<RestaurantItem> restaurantItems {get; set;}
-    public Item menuItem { get; set; }
-    public List<Restaurant> restaurants { get; set; }
-    public Restaurant restaurant { get; set; }
-    public int selectedRestaurant { get; set; } = 1;
-    public List<Restaurant> restaurantsAndItems { get; set; }
-
     [Parameter]
     public int Id { get; set; }
-    public string ItemName { get; set; } = null!;
-    public string? Description { get; set; }
+    private string ItemName { get; set; } = null!;
+    private string? Description { get; set; }
+    private int selectedRestaurant { get; set; } = 1;
+    private List<Item> menuItems { get; set; }
+    private List<Restaurant> restaurantsAndItems { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
         menuItems = await context.Items.ToListAsync();
-        restaurants = await context.Restaurants.ToListAsync();
-        restaurantItems = await context.RestaurantItems.ToListAsync();
         restaurantsAndItems = await context.Restaurants
             .Include(ri => ri.RestaurantItems)
             .ToListAsync();
@@ -176,11 +172,5 @@ else
     {
         StateHasChanged();
         await Task.CompletedTask;
-    }
-    protected async Task OnParameterSetAsync()
-    {
-        using var context = ContextFactory.CreateDbContext();
-        menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == Id);
-        restaurant = await context.Restaurants.FirstOrDefaultAsync(it => it.Id == Id);
     }
 }

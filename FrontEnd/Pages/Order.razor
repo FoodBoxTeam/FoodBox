@@ -1,65 +1,49 @@
 ﻿@page "/order"
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
-@inject IDbContextFactory<FoodBoxDB> ContextFactory;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
+@inject OrderState OrderState
 
 <h3>Your Order: </h3>
-@* @if (employees is not null)
+@if (OrderState.ItemsInOrder.Count > 0)
 {
 
-    <table class="table-striped">
+    <table class="table table-striped">
         <thead>
-            <tr>Id</tr>
-            <tr>Name</tr>
-            <tr>Phone Number</tr>
-            <tr>Email</tr>
-            <tr>Tax Id</tr>
-            <tr>Base Hourly Rate</tr>
+            <tr>
+                <th scope="col">Picture</th>
+                <th scope="col">Name</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+            </tr>
         </thead>
         <tbody>
 
-            @foreach (var employee in employees)
+            @foreach (var restautantItem in OrderState.ItemsInOrder)
             {
                 <tr>
-                    <td>@employee.Id</td>
-                    <td>@employee.EeName</td>
-                    <td>@employee.EePhone</td>
-                    <td>@employee.EeEmail</td>
-                    <td>@employee.Taxid</td>
-                    <td>@employee.BaseHourlyRate</td>
+                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
+                    <td>@restautantItem.Quantity</td>
+                    <td>@restautantItem.PriceXQty</td>
                 </tr>
             }
+            
         </tbody>
     </table>
+    <h3>Order Total: @orderTotal</h3>
 }
 else
 {
-    <p>No employees</p>
-} *@
+    <p>No Items Ordered so far</p>
+}
 
 @code {
-    public List<Item> menuItems { get; set; }
-    public List<RestaurantItem> restaurantItems { get; set; }
-    public Item menuItem { get; set; }
-    public List<Restaurant> restaurants { get; set; }
-    public Restaurant restaurant { get; set; }
-    public int selectedRestaurant { get; set; } = 1;
-    public List<Restaurant> restaurantsAndItems { get; set; }
-    public decimal price { get; set; }
-    public EventCallback<bool> OnSubmit { get; set; }
-    public EventCallback OnCancel { get; set; }
+    private decimal orderTotal { get; set; } = 0;
+    private EventCallback<bool> OnSubmit { get; set; }
+    private EventCallback OnCancel { get; set; }
     private bool IsBusy { get; set; }
-
-    // [Parameter]
-    // public int SelectedItemId { get; set; }
-    // [Parameter]
-    // public int RestaurantId { get; set; }
-    public string ItemName { get; set; } = null!;
-    public string? Description { get; set; }
-    public int quantityItem { get; set; } = 1;
-    private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    public ListOrderingItemDto listOrderingItemDto { get; set; } 
 
     // private async Task HandleValidSubmit()
     // {
@@ -91,26 +75,11 @@ else
     //     NavigateToOrderPage();
     // }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        using var context = ContextFactory.CreateDbContext();
-        menuItems = await context.Items.ToListAsync();
-        restaurants = await context.Restaurants.ToListAsync();
-        restaurantItems = await context.RestaurantItems.ToListAsync();
-        restaurantsAndItems = await context.Restaurants
-            .Include(ri => ri.RestaurantItems)
-            .ToListAsync();
-        // listOrderingItemDto = await listOrderingItemDto.list[0].ItemPrice;
-    }
-
-    protected async Task OnParameterSetAsync()
-    {
-        using var context = ContextFactory.CreateDbContext();
-        // menuItem = await context.Items.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
-        // restaurant = await context.Restaurants.FirstOrDefaultAsync(it => it.Id == SelectedItemId);
-    }
-    private void NavigateToOrderPage()
-    {
-        NavigationManager.NavigateTo($"/order");
+        foreach (var restautantItem in OrderState.ItemsInOrder) 
+        { 
+            orderTotal += restautantItem.PriceXQty; 
+        }
     }
 }
