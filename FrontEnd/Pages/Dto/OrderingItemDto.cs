@@ -2,8 +2,8 @@
 {
     public class OrderingItemDto
     {
-        public int ItemId { get; set; }
+        public RestaurantItem RestrauntItem { get; set; }
         public int Quantity { get; set; }
-        public decimal ItemPrice { get; set; }
+        public decimal PriceXQty { get; set; }
     }
 }
