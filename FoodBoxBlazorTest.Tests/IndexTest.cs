@@ -3,10 +3,14 @@ using FrontEnd.Data;
 using FrontEnd.Pages;
 using FrontEnd.Shared;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices;
+using System;
 using Xunit;
 
 namespace FoodBoxBlazorTest.Tests
@@ -16,6 +20,10 @@ namespace FoodBoxBlazorTest.Tests
     /// </summary>
     public class IndexTest
     {
+
+        Mock<IDbContextFactory<IdentityDbContext>> _mockDbFactory = new();
+        Mock<IdentityDbContext> _mockDbContext = new Mock<IdentityDbContext>();
+
         /*[Fact]
         public void Markup()
         {
@@ -98,10 +106,17 @@ namespace FoodBoxBlazorTest.Tests
         public void OnSubmitEventTriggeredOnClick()
         {
             // arrange
+            //_mockDbContext.Setup(m => m. )
             var ctx = new TestContext();
+            var mockIdentityContext = new Mock<IdentityDbContext>();
+            //mockIdentityContext.Setup(m => m);
+            _mockDbFactory.Setup(f => f.CreateDbContext()).Returns(mockIdentityContext.Object);
+
+            ctx.Services.AddSingleton(_mockDbFactory.Object);
             ctx.Services.AddSingleton(new OrderState());
+
             var eventCalled = false;
-            var orderstate = new OrderState();
+            //var orderstate = new OrderState();
             var comp = ctx.RenderComponent<FrontEnd.Pages.OrderingItem>(parameters => parameters
                 .Add(selItem => selItem.SelectedItemId, 2)
                 .Add(pri => pri.price, (decimal)10.00)
