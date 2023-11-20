@@ -1,7 +1,11 @@
 using Bunit;
+using FrontEnd.Data;
 using FrontEnd.Pages;
+using FrontEnd.Shared;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.CodeAnalysis.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -36,7 +40,7 @@ namespace FoodBoxBlazorTest.Tests
             // Act
 
             var comp = ctx.RenderComponent<FrontEnd.Pages.OrderingItem>(parameters => parameters
-                .Add(p => p.ItemName, "Salmon")
+                .Add(p => p.SelectedItemId, 2)
                 .Add(pri => pri.price, (decimal)12.99)
                 .Add(qan => qan.quantityItem, 1)
                 .Add(rest => rest.RestaurantId, 1)
@@ -95,14 +99,14 @@ namespace FoodBoxBlazorTest.Tests
         {
             // arrange
             var ctx = new TestContext();
+            ctx.Services.AddSingleton(new OrderState());
             var eventCalled = false;
-
+            var orderstate = new OrderState();
             var comp = ctx.RenderComponent<FrontEnd.Pages.OrderingItem>(parameters => parameters
-                .Add(p => p.ItemName, "Salmon")
+                .Add(selItem => selItem.SelectedItemId, 2)
                 .Add(pri => pri.price, (decimal)10.00)
                 .Add(qan => qan.quantityItem, 1)
                 .Add(rest => rest.RestaurantId, 1)
-                .Add(selectedItm => selectedItm.SelectedItemId, 1)
                 .Add(p => p.OnSubmit, () => { eventCalled = true; })
             );
 
