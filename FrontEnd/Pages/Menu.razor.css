@@ -40,8 +40,8 @@
         left: 50%;
         transform: translate(-50%, -50%);
         -ms-transform: translate(-50%, -50%);
-        background-color: white;
-        color: black;
+        background-color: black;
+        color: white;
         font-size: 24px;
         padding: 12px 24px;
         border: none;
@@ -50,8 +50,8 @@
     }
 
         .container .btn:hover {
-            background-color: black;
-            color: white;
+            background-color: #28a745;
+            color: black;
         }
 
 
