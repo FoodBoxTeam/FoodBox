@@ -84,11 +84,11 @@ else
     {
         List<int> containedItems = new();
         OrderState tempOrderState = new();
-        oldOrderState.itemCount = 0;
+        oldOrderState.itemCounter = 0;
 
         foreach (var orderingItem in oldOrderState.ItemsInOrder)
         {
-            oldOrderState.itemCount = oldOrderState.itemCount + 1;
+            oldOrderState.itemCounter = oldOrderState.itemCounter + 1;
             if (!containedItems.Contains(orderingItem.RestrauntItem.Id))
             {
                 containedItems.Add(orderingItem.RestrauntItem.Id);
@@ -96,7 +96,7 @@ else
             }
             else
             {
-                if (oldOrderState.itemCount > oldOrderState.previousItemCount)
+                if (oldOrderState.itemCounter > oldOrderState.previousItemCount)
                 {
                     var specifiedItem = tempOrderState.ItemsInOrder.Where(iio => iio.RestrauntItem.Id == orderingItem.RestrauntItem.Id).Single();
                     specifiedItem.Quantity += orderingItem.Quantity;
@@ -105,9 +105,9 @@ else
             }
         }
 
-        for (int i = 0; i < oldOrderState.itemCount; i++)
+        for (int i = 0; i < tempOrderState.ItemsInOrder.Count; i++)
         {
-            orderTotal += oldOrderState.ItemsInOrder[i].PriceXQty;
+            orderTotal += tempOrderState.ItemsInOrder[i].PriceXQty;
         }
 
         oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;

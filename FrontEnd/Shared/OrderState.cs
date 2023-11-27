@@ -7,7 +7,7 @@ namespace FrontEnd.Shared
     {
         public List<OrderingItemDto> ItemsInOrder { get; set; } = new List<OrderingItemDto>();
         public Data.Restaurant? Restaurant { get; set; } = null;
-        public int itemCount { get; set; }
+        public int itemCounter { get; set; }
         public int previousItemCount { get; set; }
 
         // public bool HasBeenOrdered { get; set; } = false;
