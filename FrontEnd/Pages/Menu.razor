@@ -5,7 +5,7 @@
 
 <PageTitle>Menu</PageTitle>
 
-@if (restaurantsAndItems is not null && menuItems is not null)
+@if (restaurants is not null && menuItems is not null)
 {
     if (selectedRestaurant != -1 && OrderState.Restaurant is not null)
     {
@@ -21,12 +21,34 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-4 col-md-6">
+                    @foreach (var item in restaurants[selectedRestaurant - 1].RestaurantItems)
+                    {
+                        <div class="col-xl-4 col-md-6">
+                            <div class="single_order">
+                                <div class="order_thumb">
+                                    <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
+                                    <div class="order_prise">
+                                        <span>@item.Price</span>
+                                    </div>
+                                </div>
+                                <div class="order_info">
+                                    <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
+                                    <p>
+                                        @*IngredientsGoHere*@ <br>
+                                        @item.Item.Description <br>
+                                    </p>
+                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @* <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -42,9 +64,9 @@
                     <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -60,9 +82,9 @@
                     <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -78,9 +100,9 @@
                     <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -96,9 +118,9 @@
                     <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -114,9 +136,9 @@
                     <div class="col-xl-4 col-md-6">
                         <div class="single_order">
                             <div class="order_thumb">
-                                <img src="Images/@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Item.Image" class="rounded" style="height:17em;" alt="">
                                 <div class="order_prise">
-                                    <span>@restaurantsAndItems[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Price</span>
+                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Price</span>
                                 </div>
                             </div>
                             <div class="order_info">
@@ -128,7 +150,7 @@
                                 <a href="orderingitem/5/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
                             </div>
                         </div>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -144,7 +166,7 @@
             <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Choose Restaurant Location</label>
             <InputSelect id="restaurant" class="form-select label-large"
             @bind-Value="@selectedRestaurant">
-                @foreach (var rt in restaurantsAndItems)
+                @foreach (var rt in restaurants)
                 {
                     <option value="@rt.Id">@rt.RestaurantName</option>
                 }
@@ -170,14 +192,15 @@ else
     private string? Description { get; set; }
     private int selectedRestaurant { get; set; } = -1;
     private List<Item> menuItems { get; set; }
-    private List<Restaurant> restaurantsAndItems { get; set; }
+    private List<Restaurant> restaurants { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
         menuItems = await context.Items.ToListAsync();
-        restaurantsAndItems = await context.Restaurants
+        restaurants = await context.Restaurants
             .Include(ri => ri.RestaurantItems)
+            .OrderBy(ri => ri.Id)
             .ToListAsync();
         await refreshAsync();
 
@@ -196,7 +219,7 @@ else
     {
         if(selectedRestaurant != -1)
         {
-            OrderState.Restaurant = restaurantsAndItems.Where(r => r.LocationId == selectedRestaurant).Single();
+            OrderState.Restaurant = restaurants.Where(r => r.LocationId == selectedRestaurant).Single();
         }
     }
 }
