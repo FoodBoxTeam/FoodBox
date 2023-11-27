@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject OrderState OrderState
 
-<h3>Your Order: </h3>
+<h3 class="emtbox">Your Order: </h3>
 @if (OrderState.ItemsInOrder.Count > 0)
 {
 
@@ -36,7 +36,7 @@
 }
 else
 {
-    <p>No Items Ordered so far</p>
+    <img class="emtbox" src="/Images/EmptyBox.png"/>
 }
 
 @code {
