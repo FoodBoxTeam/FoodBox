@@ -17,7 +17,7 @@
                     <div class="screen-body">
                         <div class="screen-body-item left">
                             <div class="app-title">
-                                <span>@menuItems[SelectedItemId].ItemName</span>
+                                <span>@restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Item.ItemName</span>
                             </div>
                             <div class="app-contact">CONTACT INFO : +1 314 928 0595</div>
                         </div>
@@ -37,7 +37,7 @@
                                             disabled="@IsBusy" @onclick="HandleSubmit">
                                         Submit
                                     </button>
-                                    <div style="color:grey;">Price: @(quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).Single().Price)</div>
+                                    <div style="color:grey;">Price: @(quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price)</div>
                                     @* <div>itemOrder for testing:</div>
                                     <div>Id: @selectedItemOrder.ItemId</div>
                                     <div>Quantity: @selectedItemOrder.Quantity</div>
@@ -100,9 +100,9 @@ else
     {
         if (restaurantsAndItems is not null)
         {
-            selectedItemOrder.RestrauntItem = restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).ToList()[0];
+            selectedItemOrder.RestrauntItem = restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single();
             selectedItemOrder.Quantity = quantityItem;
-            selectedItemOrder.PriceXQty = quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == (SelectedItemId + 1)).ToList()[0].Price;
+            selectedItemOrder.PriceXQty = quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price;
             OrderState.ItemsInOrder.Add(selectedItemOrder);
             NavigateToOrderPage();
         }
