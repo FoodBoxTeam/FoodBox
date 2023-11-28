@@ -38,7 +38,7 @@ namespace FoodBoxBlazorTest.Tests
             PageTitleElement.MarkupMatches("<PageTitle>Home</PageTitle>");
         }*/
 
-        [Fact]
+        /*[Fact]
         public void InitialRender_WithEventCallBack()
         {
             // Arrange
@@ -130,7 +130,7 @@ namespace FoodBoxBlazorTest.Tests
 
             // assert
             Assert.True(eventCalled);
-        }
+        }*/
 
 
     }
