@@ -42,115 +42,6 @@
                             </div>
                         </div>
                     }
-
-                    @* <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/0/@selectedRestaurant">@menuItems[0].ItemName</a></h3>
-                                <p>
-                                    Naan | Peas | Olives | Peppers | Mixed Vegetables <br>
-                                    Delicious Salad! <br>
-                                </p>
-                                <a href="orderingitem/0/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 2).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/1/@selectedRestaurant">@menuItems[1].ItemName</a></h3>
-                                <p>
-                                    Medium Rare Steak | Or Your Choice Cooked <br>
-                                    Grilled Tomatoes | Other Veggies<br>
-                                </p>
-                                <a href="orderingitem/1/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 3).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/2/@selectedRestaurant">@menuItems[2].ItemName</a></h3>
-                                <p>
-                                    Grilled Chicken | Falafel <br>
-                                    Mixed Vegetable <br>
-                                </p>
-                                <a href="orderingitem/2/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 4).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/3/@selectedRestaurant">@menuItems[3].ItemName</a></h3>
-                                <p>
-                                    Perfectly Roasted Salmon! <br>
-                                    Salad On The Side! <br>
-                                </p>
-                                <a href="orderingitem/3/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 5).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/4/@selectedRestaurant">@menuItems[4].ItemName</a></h3>
-                                <p>
-                                    Perfectly Frozen Ice Cream <br>
-                                    With Blackberries On The Side<br>
-                                </p>
-                                <a href="orderingitem/4/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-6">
-                        <div class="single_order">
-                            <div class="order_thumb">
-                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Item.Image" class="rounded" style="height:17em;" alt="">
-                                <div class="order_prise">
-                                    <span>@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 6).Single().Price</span>
-                                </div>
-                            </div>
-                            <div class="order_info">
-                                <h3><a href="orderingitem/5/@selectedRestaurant">@menuItems[5].ItemName</a></h3>
-                                <p>
-                                    Perfectly Baked Sourdough<br>
-                                    Salt and Grain On The Side<br>
-                                </p>
-                                <a href="orderingitem/5/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
-                            </div>
-                        </div>
-                    </div> *@
                 </div>
             </div>
         </div>
@@ -159,10 +50,6 @@
     else
     {
         <div class="container" style="padding-top:3em;">
-            @* <div class="section_title mb-70">
-    <h7>Choose Restaurant Location</h7>
-    <p></p>
-    </div> *@
             <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Choose Restaurant Location</label>
             <InputSelect id="restaurant" class="form-select label-large"
             @bind-Value="@selectedRestaurant">

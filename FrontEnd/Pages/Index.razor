@@ -1,12 +1,27 @@
 ﻿@page "/"
+@using FrontEnd.Data;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject OrderState OrderState
 
 <PageTitle>Home</PageTitle>
 
-<div class="container">
-    <img class="img-fluid" src="Images/banner 1.png"/>
-    @* <Button Color="ButtonColor.Primary" Size="Size.Large"> Large button </Button> *@
+
+<div class="container1">
+
+    <div class="carousel">
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+        <div class="carousel__face"></div>
+    </div>
+
     <NavLink class="nav-link" href="menu" Match="NavLinkMatch.All">
-    <button class="btn" href="order">Order Now!</button>
+        <button class="btn" href="order">Order Now!</button>
     </NavLink>
 </div>
 
@@ -21,116 +36,56 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-1.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
+        @if (restaurants is not null && menuItems is not null)
+        {
+            <div class="row">
+                @for (int i = 1; i < 7; i++)
+                {
+                    <div class="col-xl-4 col-md-6">
+                        <div class="single_order">
+                            <div class="order_thumb">
+                                <img src="Images/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == i).Single().Item.Image" class="rounded" style="height:17em;" alt="">
+                            </div>
+                            <div class="order_info">
+                                <h3><a href="orderingitem/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == i).Single().Item.Id/">@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == i).Single().Item.ItemName</a></h3>
+                                <p>
+                                    @*IngredientsGoHere*@ <br>
+                                    @restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Description <br>
+                                </p>
+                            <a href="menu" class="boxed_btn">Order Now!</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Mediterranean Salad</a></h3>
-                        <p>
-                            Naan | Peas | Olives | Peppers | Mixed Vegetables <br>
-                            Delicious Salad! <br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-2.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Sirloin Steak</a></h3>
-                        <p>
-                            Medium Rare Steak | Or Your Choice Cooked <br>
-                            Grilled Tomatoes | Other Veggies<br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-3.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Chicken Shawarma</a></h3>
-                        <p>
-                            Grilled Chicken | Falafel <br>
-                            Mixed Vegetable <br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-4.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Oven Roasted Salmon</a></h3>
-                        <p>
-                            Perfectly Roasted Salmon! <br>
-                            Salad On The Side! <br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-5.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Blackberry Dreamsicle</a></h3>
-                        <p>
-                            Perfectly Frozen Ice Cream <br>
-                            With Blackberries On The Side<br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/favoriteorders/order-6.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="menu">Sourdough Bread</a></h3>
-                        <p>
-                            Perfectly Baked Sourdough<br>
-                            Salt and Grain On The Side<br>
-                        </p>
-                        <a href="menu" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+                }
+            </div> 
+        }
     </div>
 </div>
 <!-- order_area_end -->
+
+@code {
+    private int selectedRestaurant { get; set; } = 1;
+    private List<Item> menuItems { get; set; }
+    private List<Restaurant> restaurants { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItems = await context.Items.ToListAsync();
+        restaurants = await context.Restaurants
+            .Include(ri => ri.RestaurantItems)
+            .OrderBy(ri => ri.Id)
+            .ToListAsync();
+        await refreshAsync();
+
+        if (OrderState.Restaurant is not null)
+        {
+            selectedRestaurant = OrderState.Restaurant.LocationId;
+        }
+    }
+    async Task refreshAsync()
+    {
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+}
