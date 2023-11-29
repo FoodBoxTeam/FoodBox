@@ -1,11 +1,12 @@
-﻿using FoodBoxBlazorTest.Tests;
+﻿/*
+using FoodBoxBlazorTest.Tests;
 using FrontEnd.Data;
 using Microsoft.AspNetCore.Identity;
-/*using SampleAPI.DataAccessLayer.Context;
+using SampleAPI.DataAccessLayer.Context;
 using SampleAPI.DataAccessLayer.Interface;
 using SampleAPI.DataAccessLayer.Models;
 using SampleAPI.DataAccessLayer.Repository;
-using SampleAPI.Tests.DataAccessLayer.ContextMock;*/
+using SampleAPI.Tests.DataAccessLayer.ContextMock;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace FoodBoxBlazorTest.Tests
 {
-   /* public class DbContextMock
+   public class DbContextMock
     {
         public static FoodBoxDB GetMock()
         {
@@ -40,5 +41,6 @@ namespace FoodBoxBlazorTest.Tests
             }
             return lstUser;
         }
-    }*/
-}
+    }
+} 
+*/
