@@ -14,6 +14,7 @@
                 <th scope="col">Picture</th>
                 <th scope="col">Name</th>
                 <th scope="col">Quantity</th>
+                <th scope="col">Edit</th>
                 <th scope="col">Price</th>
                 <th scope="col">Remove</th>
             </tr>
@@ -25,7 +26,8 @@
                 <tr>
                     <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
                     <td>@restautantItem.RestrauntItem.Item.ItemName</td>
-                    <td>
+                    <td>@restautantItem.Quantity</td>
+                    @* <td>
                     <InputSelect id="quantity" class="form-control"
                         @bind-Value="@restautantItem.Quantity">
                         @foreach (int num in quantity)
@@ -34,8 +36,9 @@
                                 <option value="@num">@num</option>
                         }
                     </InputSelect>
-                    </td>
+                    </td> *@
                     <td>@restautantItem.PriceXQty</td>
+                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
                     <td><button class="primary" @onclick="Remove">Remove</button></td>
                 </tr>
             }
@@ -97,12 +100,12 @@ else
     }
     private async Task HandleSubmit()
     {
-        
+
     }
-    private void Remove()
+    private void Edit ()
     {
     }
-    private void Update()
+    private void Remove()
     {
     }
     protected override void OnInitialized()
@@ -132,6 +135,14 @@ else
                     specifiedItem.Quantity += orderingItem.Quantity;
                     specifiedItem.PriceXQty += orderingItem.PriceXQty;
                 }
+            }
+        }
+
+        foreach (var orderingItem in tempOrderState.ItemsInOrder)
+        {
+            if (orderingItem.Quantity > 10)
+            {
+                orderingItem.Quantity = 10;
             }
         }
 

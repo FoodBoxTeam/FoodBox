@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontEnd", "FrontEnd\FrontE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FBAPI", "FBAPI\FBAPI.csproj", "{5A7B1A7B-A9F5-409B-856F-2C0ED09BF489}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodBoxBlazorTest.Tests", "FoodBoxBlazorTest.Tests\FoodBoxBlazorTest.Tests.csproj", "{F780DC16-E5F2-47F4-A01D-DC6E1A52B29C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FoodBoxBlazorTest.Tests", "FoodBoxBlazorTest.Tests\FoodBoxBlazorTest.Tests.csproj", "{F780DC16-E5F2-47F4-A01D-DC6E1A52B29C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
