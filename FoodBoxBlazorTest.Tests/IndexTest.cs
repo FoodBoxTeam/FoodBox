@@ -15,6 +15,19 @@ using Xunit;
 
 namespace FoodBoxBlazorTest.Tests
 {
+    public class UnitTest1 : IClassFixture<FoodBoxWebApplicationFacotry>
+    {
+        private readonly HttpClient httpClient;
+
+        public UnitTest1(FoodBoxWebApplicationFacotry factory) 
+        {
+            httpClient = factory.CreateDefaultClient();
+        }
+    }
+
+
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -23,6 +36,8 @@ namespace FoodBoxBlazorTest.Tests
 
         Mock<IDbContextFactory<IdentityDbContext>> _mockDbFactory = new();
         Mock<IdentityDbContext> _mockDbContext = new Mock<IdentityDbContext>();
+
+        
 
         /*[Fact]
         public void Markup()
