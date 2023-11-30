@@ -3,10 +3,10 @@
 @using FrontEnd.Pages.Dto;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState OrderState
+@inject OrderState orderState
 
 <h3>Your Order: </h3>
-@if (OrderState.ItemsInOrder.Count > 0)
+@if (orderState.ItemsInOrder.Count > 0)
 {
     <table class="table table-striped">
         <thead>
@@ -20,29 +20,20 @@
             </tr>
         </thead>
         <tbody>
-
-            @foreach (var restautantItem in OrderState.ItemsInOrder)
+            @foreach (var restautantItem in orderState.ItemsInOrder)
             {
                 <tr>
                     <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
                     <td>@restautantItem.RestrauntItem.Item.ItemName</td>
                     <td>@restautantItem.Quantity</td>
-                    @* <td>
-                    <InputSelect id="quantity" class="form-control"
-                        @bind-Value="@restautantItem.Quantity">
-                        @foreach (int num in quantity)
-                        {
-                            //This needs to actually change the restaurantItem.Quantity value in real time.
-                                <option value="@num">@num</option>
-                        }
-                    </InputSelect>
-                    </td> *@
-                    <td>@restautantItem.PriceXQty</td>
                     <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
-                    <td><button class="primary" @onclick="Remove">Remove</button></td>
+                    <td>@restautantItem.PriceXQty</td>
+                    <button type="submit" class="primary"
+                            disabled="@IsBusy" @onclick="() => HandleDelete(restautantItem)">
+                        Remove
+                    </button>
                 </tr>
             }
-
         </tbody>
     </table>
     <h3>Order Total: @orderTotal</h3>
@@ -55,12 +46,6 @@
                 <option value="@om">@om</option>
             }
         </InputSelect>
-    </div>
-    <div class="app-form-group buttons">
-        <button type="submit" class="app-form-button"
-                disabled="@IsBusy" @onclick="HandleSubmit">
-            Submit Order
-        </button>
     </div>
 }
 else
@@ -102,18 +87,18 @@ else
     {
 
     }
-    private void Edit ()
+
+    private void HandleDelete(OrderingItemDto item)
     {
-    }
-    private void Remove()
-    {
-    }
-    protected override void OnInitialized()
-    {
-        OrderState = MergeItemsInList(OrderState);
+        orderState.ItemsInOrder.Remove(item);
     }
 
-    OrderState MergeItemsInList(OrderState oldOrderState)
+    protected override void OnInitialized()
+    {
+        orderState = MergeItemsInList(orderState);
+    }
+
+    private OrderState MergeItemsInList(OrderState oldOrderState)
     {
         List<int> containedItems = new();
         OrderState tempOrderState = new();

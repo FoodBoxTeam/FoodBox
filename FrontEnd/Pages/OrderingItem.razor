@@ -38,10 +38,6 @@
                                         Submit
                                     </button>
                                     <div style="color:grey;">Price: @(quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price)</div>
-                                    @* <div>itemOrder for testing:</div>
-                                    <div>Id: @selectedItemOrder.ItemId</div>
-                                    <div>Quantity: @selectedItemOrder.Quantity</div>
-                                    <div>Price: @selectedItemOrder.ItemPrice</div> *@
                                 </div>
                             </div>
                         </div>
@@ -49,7 +45,6 @@
                 </div>
             </div>
         </div>
-
     </EditForm>
 }
 else
