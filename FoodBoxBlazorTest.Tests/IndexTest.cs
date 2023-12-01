@@ -17,11 +17,33 @@ namespace FoodBoxBlazorTest.Tests
 {
     public class UnitTest1 : IClassFixture<FoodBoxWebApplicationFacotry>
     {
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
+        private readonly IdentityDbContext? _foodBoxDB;
 
         public UnitTest1(FoodBoxWebApplicationFacotry factory) 
         {
-            httpClient = factory.CreateDefaultClient();
+            _httpClient = factory.CreateDefaultClient();
+            _foodBoxDB = factory.Services.GetService<IdentityDbContext>();
+        }
+
+        [Fact]
+        public void Markup()
+        {
+            //Arrange 
+            // var responseMessage = await _httpClient.GetAsync("/");
+            using var ctx = new TestContext();
+            
+
+            //ctx.Services.AddSingleton(_mockDbFactory.Object);
+            ctx.Services.AddSingleton(new OrderState());
+            ctx.Services.AddSingleton(_foodBoxDB);
+
+            //Act
+            var renderedComponent = ctx.RenderComponent<FrontEnd.Pages.Index>();
+
+            //Assert
+            var PageTitleElement = renderedComponent.Find("PageTitle");
+            PageTitleElement.MarkupMatches("<PageTitle>Home</PageTitle>");
         }
     }
 
@@ -53,7 +75,7 @@ namespace FoodBoxBlazorTest.Tests
             PageTitleElement.MarkupMatches("<PageTitle>Home</PageTitle>");
         }*/
 
-        /*[Fact]
+        [Fact]
         public void InitialRender_WithEventCallBack()
         {
             // Arrange
@@ -145,7 +167,7 @@ namespace FoodBoxBlazorTest.Tests
 
             // assert
             Assert.True(eventCalled);
-        }*/
+        }
 
 
     }
