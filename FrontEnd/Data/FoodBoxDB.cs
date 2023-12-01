@@ -24,8 +24,6 @@ public partial class FoodBoxDB : IdentityDbContext
 
     public virtual DbSet<Item> Items { get; set; }
 
-    public virtual DbSet<Location> Locations { get; set; }
-
     public virtual DbSet<Purchase> Purchases { get; set; }
 
     public virtual DbSet<PurchaseItem> PurchaseItems { get; set; }
@@ -35,6 +33,7 @@ public partial class FoodBoxDB : IdentityDbContext
     public virtual DbSet<Restaurant> Restaurants { get; set; }
 
     public virtual DbSet<RestaurantItem> RestaurantItems { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Name=db");
@@ -115,25 +114,6 @@ public partial class FoodBoxDB : IdentityDbContext
                 .HasColumnName("item_name");
         });
 
-        modelBuilder.Entity<Location>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("location_pkey");
-
-            entity.ToTable("location");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Address).HasColumnName("address");
-            entity.Property(e => e.City)
-                .HasMaxLength(60)
-                .HasColumnName("city");
-            entity.Property(e => e.Country)
-                .HasMaxLength(60)
-                .HasColumnName("country");
-            entity.Property(e => e.State)
-                .HasMaxLength(60)
-                .HasColumnName("state");
-        });
-
         modelBuilder.Entity<Purchase>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("purchase_pkey");
@@ -144,6 +124,7 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.Property(e => e.CouponId).HasColumnName("coupon_id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
             entity.Property(e => e.PurchaseDate).HasColumnName("purchase_date");
+            entity.Property(e => e.Restaurant).HasColumnName("restaurant_id");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(3, 3)
                 .HasDefaultValueSql("0.073")
@@ -152,6 +133,14 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.HasOne(d => d.Coupon).WithMany(p => p.Purchases)
                 .HasForeignKey(d => d.CouponId)
                 .HasConstraintName("purchase_coupon_id_fkey");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("purchase_customer_id_fkey");
+
+            entity.HasOne(d => d.Restaurant).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.RestaurantId)
+                .HasConstraintName("purchase_restaurant_id_fkey");
         });
 
         modelBuilder.Entity<PurchaseItem>(entity =>
@@ -213,15 +202,25 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.ToTable("restaurant");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.LocationId).HasColumnName("location_id");
+            entity.Property(e => e.Country).HasColumnName("country");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.City).HasColumnName("city");
+            entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.RestaurantName)
                 .HasMaxLength(50)
                 .HasColumnName("restaurant_name");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Restaurants)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("restaurant_location_id_fkey");
+            entity.Property(e => e.Country)
+                .HasMaxLength(60)
+                .HasColumnName("country");
+            entity.Property(e => e.State)
+                .HasMaxLength(60)
+                .HasColumnName("state");
+            entity.Property(e => e.City)
+                .HasMaxLength(60)
+                .HasColumnName("city");
+            entity.Property(e => e.Address)
+                .HasMaxLength(60)
+                .HasColumnName("address");
         });
 
         modelBuilder.Entity<RestaurantItem>(entity =>
@@ -246,6 +245,44 @@ public partial class FoodBoxDB : IdentityDbContext
                 .HasForeignKey(d => d.RestaurantId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("restaurant_item_restaurant_id_fkey");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("cart_item_pkey");
+
+            entity.ToTable("cart_item");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ItemId).HasColumnName("item_id");
+            entity.Property(e => e.ActualPrice)
+                .HasColumnType("money")
+                .HasColumnName("actual_price");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ItemId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("cart_item_item_id_fkey");
+        });
+
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("cart_pkey");
+
+            entity.ToTable("cart");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+            entity.Property(e => e.Restaurant).HasColumnName("restaurant_id");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("cart_customer_id_fkey");
+
+            entity.HasOne(d => d.Restaurant).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.RestaurantId)
+                .HasConstraintName("cart_restaurant_id_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

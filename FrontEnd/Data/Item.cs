@@ -13,6 +13,8 @@ public partial class Item
 
     public string Image { get; set; } = null!;
 
+    public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
     public virtual ICollection<FavoriteItem> FavoriteItems { get; set; } = new List<FavoriteItem>();
 
     public virtual ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
