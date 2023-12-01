@@ -20,6 +20,8 @@ namespace FoodBoxBlazorTest.Tests
     public class FoodBoxWebApplicationFacotry : WebApplicationFactory<Program>, IAsyncLifetime
     {
         private readonly PostgreSqlContainer _dbContainer;
+        // private FoodBoxDB _dbContext;
+        // public FoodBoxDB dbContext { get => _dbContext; }
 
         public FoodBoxWebApplicationFacotry()
         {
@@ -40,6 +42,7 @@ namespace FoodBoxBlazorTest.Tests
             builder.ConfigureTestServices(services =>
             {
                 services.RemoveAll(typeof(DbContextOptions<FoodBoxDB>));
+                //_dbContext = new FoodBoxDB(options => options.UseNpgsql(_dbContainer.GetConnectionString()));
                 services.AddDbContext<FoodBoxDB>(options => options.UseNpgsql(_dbContainer.GetConnectionString()));
             });
         }
@@ -53,6 +56,4 @@ namespace FoodBoxBlazorTest.Tests
             await _dbContainer.StopAsync();
         }
     }
-
-
 }
