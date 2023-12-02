@@ -13,7 +13,7 @@
 </InputSelect> 
 @if (restaurants is not null && menuItems is not null && selectedFilter == "Salad")
 {
-    if (selectedRestaurant != -1 && OrderState.Restaurant is not null)
+    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
     {
         <div class="order_area">
             <div class="container">
@@ -24,7 +24,7 @@
                         </div>
                     </div>
                 </div>
-                @foreach (var item in restaurants[selectedRestaurant - 1].RestaurantItems)
+                @foreach (var item in selectedRestaurant.RestaurantItems)
                 {
                     if (new[] { 1, 7, 8, 10 }.Contains(item.Item.Id))
                     {
@@ -42,7 +42,7 @@
                                         @*IngredientsGoHere*@ <br>
                                         @item.Item.Description <br>
                                     </p>
-                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
+                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
                                 </div>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
 
 @if (restaurants is not null && menuItems is not null)
 {
-    if (selectedRestaurant != -1 && OrderState.Restaurant is not null)
+    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
     {
         <!-- order_area_start -->
         <div class="order_area">
@@ -70,7 +70,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    @foreach (var item in restaurants[selectedRestaurant - 1].RestaurantItems)
+                    @foreach (var item in selectedRestaurant.RestaurantItems)
                     {
                         <div class="col-xl-4 col-md-6">
                             <div class="single_order">
@@ -86,7 +86,7 @@
                                         @*IngredientsGoHere*@ <br>
                                         @item.Item.Description <br>
                                     </p>
-                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant" class="boxed_btn">Add to Box!</a>
+                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,7 @@
         <div class="container" style="padding-top:3em;">
             <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Choose Restaurant Location</label>
             <InputSelect id="restaurant" class="form-select label-large"
-            @bind-Value="@selectedRestaurant">
+            @bind-Value="@selectedRestaurantId">
                 @foreach (var rt in restaurants)
                 {
                     <option value="@rt.Id">@rt.RestaurantName</option>
@@ -126,7 +126,8 @@ else
     public int Id { get; set; }
     private string ItemName { get; set; } = null!;
     private string? Description { get; set; }
-    private int selectedRestaurant { get; set; } = -1;
+    private Restaurant? selectedRestaurant { get; set; }
+    private int selectedRestaurantId { get; set; } = -1;
     private List<Item> menuItems { get; set; }
     private List<Restaurant> restaurants { get; set; }
     private string[] orderingBy = new string[] { "Salad", "Main Dish", "Soup", "Apple", "Shake","Dessert"};
@@ -143,7 +144,7 @@ else
 
         if(OrderState.Restaurant is not null)
         {
-            selectedRestaurant = OrderState.Restaurant.LocationId;
+            selectedRestaurant = OrderState.Restaurant;
         }
     }
     async Task refreshAsync()
@@ -154,9 +155,10 @@ else
 
     public void SelectedLocation()
     {
-        if(selectedRestaurant != -1)
+        if(selectedRestaurantId != -1)
         {
-            OrderState.Restaurant = restaurants.Where(r => r.LocationId == selectedRestaurant).Single();
+            selectedRestaurant = restaurants.Where(r => r.Id == selectedRestaurantId).Single();
+            OrderState.Restaurant = selectedRestaurant;
         }
     }
 }
