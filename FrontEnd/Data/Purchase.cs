@@ -12,16 +12,12 @@ public partial class Purchase
     public int? CouponId { get; set; }
 
     public int? CustomerId { get; set; }
-
+    public int? RestaurantId { get; set; }
     public DateOnly PurchaseDate { get; set; }
 
     public virtual Coupon? Coupon { get; set; }
-    public int RestaurantId { get; set; }
-    public Restaurant Restaurant { get; set; } = new Restaurant();
-
-    public virtual ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
-
+    public Restaurant? Restaurant { get; set; }
     public virtual Customer Customer { get; set; } = new Customer();
-
+    public virtual ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
     public virtual ICollection<PurchaseTransaction> PurchaseTransactions { get; set; } = new List<PurchaseTransaction>();
 }

@@ -77,11 +77,6 @@
             .OrderBy(ri => ri.Id)
             .ToListAsync();
         await refreshAsync();
-
-        if (OrderState.Restaurant is not null)
-        {
-            selectedRestaurant = OrderState.Restaurant.LocationId;
-        }
     }
     async Task refreshAsync()
     {

@@ -23,10 +23,10 @@
                 {
                 <tr>
                     <td>@R.RestaurantName</td>
-                    <td>@R.Location.Country</td>
-                    <td>@R.Location.State</td>
-                    <td>@R.Location.City</td>
-                    <td>@R.Location.Address</td>
+                    <td>@R.Country</td>
+                    <td>@R.State</td>
+                    <td>@R.City</td>
+                    <td>@R.Address</td>
                 </tr>
                 }
         </tbody>
@@ -41,6 +41,6 @@
     protected override async Task OnInitializedAsync()
     {
         var context = contextFactory.CreateDbContext();
-        restaurants = await context.Restaurants.Include(R => R.Location).ToListAsync();
+        restaurants = await context.Restaurants.ToListAsync();
     }
 }

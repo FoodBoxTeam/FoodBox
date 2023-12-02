@@ -124,7 +124,7 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.Property(e => e.CouponId).HasColumnName("coupon_id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
             entity.Property(e => e.PurchaseDate).HasColumnName("purchase_date");
-            entity.Property(e => e.Restaurant).HasColumnName("restaurant_id");
+            entity.Property(e => e.RestaurantId).HasColumnName("restaurant_id");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(3, 3)
                 .HasDefaultValueSql("0.073")
@@ -274,7 +274,7 @@ public partial class FoodBoxDB : IdentityDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
-            entity.Property(e => e.Restaurant).HasColumnName("restaurant_id");
+            entity.Property(e => e.RestaurantId).HasColumnName("restaurant_id");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
                 .HasForeignKey(d => d.CustomerId)
