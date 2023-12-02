@@ -12,6 +12,7 @@ public partial class Item
     public string? Description { get; set; }
 
     public string Image { get; set; } = null!;
+    public string? Ingredients { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 

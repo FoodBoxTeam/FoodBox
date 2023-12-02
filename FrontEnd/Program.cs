@@ -24,10 +24,10 @@ public class Program
         builder.Services.AddAuthentication()
            .AddGoogle(options =>
            {
-               IConfigurationSection googleAuthNSection =
-               builder.Configuration.GetSection("Authentication:Google");
-               options.ClientId = googleAuthNSection["ClientId"];
-               options.ClientSecret = googleAuthNSection["ClientSecret"];
+               //IConfigurationSection googleAuthNSection =
+               //builder.Configuration.GetSection("Authentication:Google");
+               options.ClientId = builder.Configuration["ClientId"];
+               options.ClientSecret = builder.Configuration["ClientSecret"];
            });
 
         // Add services to the container.
