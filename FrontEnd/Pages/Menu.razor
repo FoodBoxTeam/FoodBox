@@ -4,7 +4,7 @@
 @inject OrderState OrderState
 
 <PageTitle>Menu</PageTitle>
-<InputSelect id="restaurant" class="form-select label-large"
+@* <InputSelect id="restaurant" class="form-select label-large"
 @bind-Value="@selectedFilter">
     @foreach (var om in orderingBy)
     {
@@ -39,7 +39,6 @@
                                 <div class="order_info">
                                     <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
                                     <p>
-                                        @*IngredientsGoHere*@ <br>
                                         @item.Item.Description <br>
                                     </p>
                                     <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
@@ -51,7 +50,7 @@
             </div>
         </div>
     }
-}
+} *@
 
 
 @if (restaurants is not null && menuItems is not null)
@@ -98,21 +97,27 @@
     }
     else
     {
-        <div class="container" style="padding-top:3em;">
-            <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Choose Restaurant Location</label>
-            <InputSelect id="restaurant" class="form-select label-large"
-            @bind-Value="@selectedRestaurantId">
-                @foreach (var rt in restaurants)
-                {
-                    <option value="@rt.Id">@rt.RestaurantName</option>
-                }
-            </InputSelect>
-        </div>
-        <div class="container" style="padding-top: 5em">
-            <button class="btn" @onclick="SelectedLocation">Submit Location</button>
-        </div>
-        <div class="container" style="padding-top: 2em">
-            <p class="alert alert-danger">Please select your location</p>
+        <div class="background">
+            <div class="container">
+                <div class="screen">
+                    <div class="container" style="padding-top:3em;">
+                        <label for="restaurant" class="label-large" style="color:green">Choose Restaurant Location</label>
+                        <InputSelect id="restaurant" class="form-select label-large"
+                        @bind-Value="@selectedRestaurantId">
+                            @foreach (var rt in restaurants)
+                            {
+                                <option value="@rt.Id">@rt.RestaurantName</option>
+                            }
+                        </InputSelect>
+                    <div class="container" style="padding-top: 5em">
+                        <button class="btn" @onclick="SelectedLocation">Submit Location</button>
+                    </div>
+                    <div class="container" style="padding-top: 2em">
+                        <p class="alert alert-danger">Please select your location</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 }
