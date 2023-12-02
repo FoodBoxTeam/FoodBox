@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace FrontEnd;
 
@@ -21,14 +22,34 @@ public class Program
             .AddEntityFrameworkStores<FoodBoxDB>();
 
 
-        builder.Services.AddAuthentication()
+       /* builder.Services.AddAuthentication()
            .AddGoogle(options =>
            {
                //IConfigurationSection googleAuthNSection =
                //builder.Configuration.GetSection("Authentication:Google");
                options.ClientId = builder.Configuration["ClientId"];
                options.ClientSecret = builder.Configuration["ClientSecret"];
-           });
+           });*/
+        builder.Services.AddAuthentication("Cookies")
+               .AddCookie(opt =>
+               {
+                   opt.Cookie.Name = "TryingoutGoogleOAuth";
+                   opt.LoginPath = "/auth/google-login";
+               })
+               .AddGoogle(opt => 
+               {  
+                   opt.ClientId = builder.Configuration["ClientId"];
+                   opt.ClientSecret = builder.Configuration["ClientSecret"];
+                   opt.Scope.Add("profile");
+                   opt.Events.OnCreatingTicket = context =>
+                   {
+                       string picuri = context.User.GetProperty("picture").GetString();
+
+                       context.Identity.AddClaim(new Claim("picture", picuri));
+
+                       return Task.CompletedTask;
+                   };
+               });
 
         // Add services to the container.
         builder.Services.AddScoped<OrderState>();
@@ -51,11 +72,14 @@ public class Program
         app.UseStaticFiles();
 
         app.UseRouting();
+
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapBlazorHub();
         app.MapFallbackToPage("/_Host");
+
+        app.MapControllers();
 
         app.Run();
     }

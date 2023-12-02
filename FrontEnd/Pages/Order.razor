@@ -5,6 +5,16 @@
 @inject NavigationManager NavigationManager
 @inject OrderState orderState
 
+<!-- Start of Google Authorization -->
+<AuthorizeView>
+    <Authorized>
+        @foreach (var item in context.User.Claims)
+        {
+            
+        }
+    </Authorized>
+</AuthorizeView>
+<!-- End Google Authorization -->
 <h3>Your Order: </h3>
 @if (orderState.ItemsInOrder.Count > 0)
 {
