@@ -45,15 +45,15 @@ public class Program
                {  
                    opt.ClientId = builder.Configuration["ClientId"];
                    opt.ClientSecret = builder.Configuration["ClientSecret"];
-                   opt.Scope.Add("profile");
-                   opt.Events.OnCreatingTicket = context =>
+                   //opt.Scope.Add("profile");
+                  /* opt.Events.OnCreatingTicket = context =>
                    {
                        string picuri = context.User.GetProperty("picture").GetString();
 
                        context.Identity.AddClaim(new Claim("picture", picuri));
 
                        return Task.CompletedTask;
-                   };
+                   };*/
                });
 
         // Add services to the container.

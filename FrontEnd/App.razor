@@ -8,11 +8,11 @@
             </AuthorizeRouteView>
         </Found>
         <NotFound>
-            <CascadingAuthenticationState>
+            @* <CascadingAuthenticationState> *@
                 <LayoutView Layout="@typeof(MainLayout)">
                     <p>Sorry, there's nothing at this address.</p>
                 </LayoutView>
-            </CascadingAuthenticationState>
+           @*  </CascadingAuthenticationState> *@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
