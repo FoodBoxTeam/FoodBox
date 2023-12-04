@@ -36,9 +36,11 @@
         </article>
         <footer class="footer">
             <div class="bottom-row px-4">
-                <NavLink class="nav-link" href="order_history" Match="NavLinkMatch.All">
-                    <span class="oi oi-clock" aria-hidden="true"></span> Order History
-                </NavLink>
+                <AuthorizeView>
+                    <NavLink class="nav-link" href="order_history" Match="NavLinkMatch.All">
+                        <span class="oi oi-clock" aria-hidden="true"></span> Order History
+                    </NavLink>
+                </AuthorizeView>
                 <NavLink class="nav-link" href="policies" Match="NavLinkMatch.All">
                     <span class="oi oi-file" aria-hidden="true"></span> Policies
                 </NavLink>
@@ -48,9 +50,11 @@
                 <NavLink class="nav-link" href="contact" Match="NavLinkMatch.All">
                     <span class="oi oi-phone" aria-hidden="true"></span> Contact
                 </NavLink>
-                <NavLink class="nav-link" href="my_favorites" Match="NavLinkMatch.All"> @*This needs to be user level only. *@
-                    <span class="oi oi-heart" aria-hidden="true"></span> My Favorites
-                </NavLink>
+                <AuthorizeView>
+                    <NavLink class="nav-link" href="my_favorites" Match="NavLinkMatch.All">
+                        <span class="oi oi-heart" aria-hidden="true"></span> My Favorites
+                    </NavLink>
+                </AuthorizeView>
                 <NavLink class="nav-link" href="our_favorites" Match="NavLinkMatch.All">
                     <span class="oi oi-list" aria-hidden="true"></span> Our Favorites
                 </NavLink>

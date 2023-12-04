@@ -8,10 +8,9 @@
 <!-- Start of Google Authorization -->
 <AuthorizeView>
     <Authorized>
-        @foreach (var item in context.User.Claims)
-        {
-            
-        }
+        <div>
+            Wellcome! @context.User.Identity?.Name
+        </div>
     </Authorized>
 </AuthorizeView>
 <!-- End Google Authorization -->
@@ -104,6 +103,7 @@ else
     protected override void OnInitialized()
     {
         orderState = MergeItemsInList(orderState);
+
     }
 
     private OrderState MergeItemsInList(OrderState oldOrderState)
