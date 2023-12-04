@@ -8,6 +8,11 @@ using System.Security.Claims;
 
 namespace FrontEnd;
 
+/*
+TODO: Replace/fix images: Fruit bowl, Steak, Banana Split (and name in database), Not you mmamas Salad, Salmon
+ */
+
+
 public class Program
 {
     public static void Main(string[] args)

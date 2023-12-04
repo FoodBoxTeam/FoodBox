@@ -82,7 +82,7 @@
                                 <div class="order_info">
                                     <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
                                     <p>
-                                        @*IngredientsGoHere*@ <br>
+                                        <div class="text-black">@item.Item.Ingredients</div>
                                         @item.Item.Description <br>
                                     </p>
                                     <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
