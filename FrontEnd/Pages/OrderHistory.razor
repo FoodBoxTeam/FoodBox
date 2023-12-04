@@ -1,10 +1,52 @@
 ﻿@page "/order_history"
+@using System.Security.Claims;
 @attribute [Authorize()]
+@inject IDbContextFactory<FoodBoxDB> dbcontextfactory
 
 <PageTitle>Order History</PageTitle>
+
+@if (orderHistory is not null)
+{
+    @foreach (var purchase in orderHistory)
+    {
+        @foreach (var item in purchase.PurchaseItems)
+        {
+            <div class="col-xl-4 col-md-6">
+                <div class="single_order">
+                    <div class="order_thumb">
+                        <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
+                        <div class="order_prise">
+                        </div>
+                    </div>
+                    <div class="order_info">
+                        <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
+                        <p>
+                            <div class="text-black">@item.Item.Ingredients</div>
+                            @item.Item.Description <br>
+                        </p>
+                        <a href="orderingitem/@item.Item.Id/@purchase.Id" class="boxed_btn">Add to Box!</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}
 
 <h3>This is the customers Order History!</h3>
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; }
 
+    public IEnumerable<Purchase> orderHistory { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = dbcontextfactory.CreateDbContext();
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        orderHistory = await dbContext.Purchases.Where(opt => opt.CustomerId == customer.Id).ToListAsync();
+        StateHasChanged();
+    }
 }
