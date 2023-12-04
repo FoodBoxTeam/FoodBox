@@ -113,6 +113,10 @@ public partial class FoodBoxDB : IdentityDbContext
             entity.Property(e => e.ItemName)
                 .HasMaxLength(50)
                 .HasColumnName("item_name");
+            entity.Property(e => e.SuggestedPrice)
+                .HasColumnName("suggested_price")
+                .HasColumnType("money");
+
         });
 
         modelBuilder.Entity<Purchase>(entity =>
@@ -185,9 +189,6 @@ public partial class FoodBoxDB : IdentityDbContext
                 .HasMaxLength(16)
                 .IsFixedLength()
                 .HasColumnName("credit_card_number");
-            entity.Property(e => e.GotPaid)
-                .HasDefaultValueSql("false")
-                .HasColumnName("got_paid");
             entity.Property(e => e.PurchaseId).HasColumnName("purchase_id");
 
             entity.HasOne(d => d.Purchase).WithMany(p => p.PurchaseTransactions)

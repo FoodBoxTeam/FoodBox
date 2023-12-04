@@ -13,6 +13,7 @@ public partial class Item
 
     public string Image { get; set; } = null!;
     public string? Ingredients { get; set; }
+    public decimal? SuggestedPrice { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 

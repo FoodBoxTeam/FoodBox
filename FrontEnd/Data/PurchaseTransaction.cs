@@ -9,8 +9,6 @@ public partial class PurchaseTransaction
 
     public int PurchaseId { get; set; }
 
-    public bool? GotPaid { get; set; }
-
     public string CreditCardNumber { get; set; } = null!;
 
     public decimal AmountPaid { get; set; }
