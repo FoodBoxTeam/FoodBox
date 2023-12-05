@@ -7,32 +7,32 @@
 
 @if (orderHistory is not null)
 {
+
     @foreach (var purchase in orderHistory)
     {
-        @foreach (var item in purchase.PurchaseItems)
-        {
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
-                        <div class="order_prise">
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
-                        <p>
-                            <div class="text-black">@item.Item.Ingredients</div>
-                            @item.Item.Description <br>
-                        </p>
-                        <a href="orderingitem/@item.Item.Id/@purchase.Id" class="boxed_btn">Add to Box!</a>
-                    </div>
-                </div>
-            </div>
-        }
+    <table class="table table-striped">
+        <thead>
+                <tr>
+                    @foreach (var item in purchase.PurchaseItems)
+                    {
+                        <th scope="col">@item.Item.ItemName - @item.Quantity</th> @*We want this centered*@
+                    }
+                    <th scope="col">@purchase.PurchaseDate</th>
+                </tr>
+        </thead>
+        <tbody>
+                <tr>
+                @foreach (var item in purchase.PurchaseItems)
+                {
+                    <td><img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt=""></td>
+                }
+                    <th><button class="btn-primary">Reorder</button></th>
+                </tr>
+        </tbody>
+    </table>
+       
     }
 }
-
-<h3>This is the customers Order History!</h3>
 
 @code {
     [CascadingParameter]
@@ -46,7 +46,11 @@
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
-        orderHistory = await dbContext.Purchases.Where(opt => opt.CustomerId == customer.Id).ToListAsync();
+        orderHistory = await dbContext.Purchases
+            .Where(opt => opt.CustomerId == customer.Id)
+            .Include(p => p.PurchaseItems)
+            .ThenInclude(pi => pi.Item)
+            .ToListAsync();
         StateHasChanged();
     }
 }
