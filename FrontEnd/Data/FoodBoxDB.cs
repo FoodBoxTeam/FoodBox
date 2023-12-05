@@ -33,6 +33,8 @@ public partial class FoodBoxDB : IdentityDbContext
     public virtual DbSet<Restaurant> Restaurants { get; set; }
 
     public virtual DbSet<RestaurantItem> RestaurantItems { get; set; }
+    public virtual DbSet<CartItem> CartItems { get; set; }
+    public virtual DbSet<Cart> Carts { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
