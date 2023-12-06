@@ -61,6 +61,9 @@
         using var dbContext = dbcontextfactory.CreateDbContext();
         var purchase = orderHistory.Where(p => p.Id == id).Single();
 
+
+        await ClearAndFindCustCartAsync(customer, purchase.Restaurant);
+
         foreach(var item in purchase.PurchaseItems)
         {
             await AddItemToCustomersCartAsync(customer, item.Item, purchase.Restaurant, item.ActualPrice, item.Quantity);
@@ -71,49 +74,61 @@
 
     public async Task AddItemToCustomersCartAsync(Customer customer, Item item, Restaurant restaurant, decimal price, int quantity)
     {
-        await FindCustCartAsync(customer, restaurant);
+        var custCart = await FindCustCartAsync(customer, restaurant);
         using var dbContext = dbcontextfactory.CreateDbContext();
-        var custCart = await dbContext.Carts.Where(c => c.Customer == customer).SingleAsync();
+        //Clear the cart and cart items
         custCart = new()
             {
+                Id = custCart.Id,
                 RestaurantId = restaurant.Id,
-                CustomerId = (await dbContext.Customers.Where(c => c == customer).SingleAsync()).Id
+                CustomerId = customer.Id
             };
 
         custCart.Restaurant = restaurant;
-        await dbContext.CartItems.AddAsync(new CartItem()
+        var newCartItem = new CartItem()
+
             {
                 CartId = custCart.Id,
                 ItemId = item.Id,
                 ActualPrice = price,
                 Quantity = quantity
-            });
+
+            };
+
+        dbContext.CartItems.Add(newCartItem);
+
 
         await dbContext.SaveChangesAsync();
+    }
+  
+    public async Task DeleteCustCartItems(Cart cart)
+    {
+        using var dbContext = dbcontextfactory.CreateDbContext();
+        await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
     }
 
     public async Task<Cart> FindCustCartAsync(Customer customer, Restaurant restaurant)
     {
         using var dbContext = dbcontextfactory.CreateDbContext();
-        var carts = await dbContext.Carts.ToListAsync();
-        var customersCart = carts.Where(c => c.Customer == customer);
+        var customersCart = await dbContext.Carts.FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
 
-        if(customersCart.Count() != 1)
+        if (customersCart is null)
         {
             var newCart = new Cart() { CustomerId = customer.Id, RestaurantId = restaurant.Id };
-            //var newCart = new Cart() { Id = 1, Customer = customer, Restaurant = restaurant };
-
-            //newCart.Restaurant = restaurant;
-            //newCart.Customer = customer;
-            //newCart.CustomerId = customer.Id;
-            //newCart.RestaurantId = restaurant.Id;
 
             dbContext.Carts.Add(newCart);
 
             await dbContext.SaveChangesAsync();
-            customersCart = carts.Where(c => c.Customer == customer);
+            customersCart = newCart;
         }
 
-        return customersCart.FirstOrDefault();
+        return customersCart;
+    }
+
+    public async Task<Cart> ClearAndFindCustCartAsync(Customer c, Restaurant r)
+    {
+        Cart cart = await FindCustCartAsync(c, r);
+        await DeleteCustCartItems(cart);
+        return cart;
     }
 }
