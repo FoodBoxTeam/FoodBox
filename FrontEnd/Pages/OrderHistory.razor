@@ -35,6 +35,10 @@
        
     }
 }
+else
+{
+    <h3>No orders to show</h3>
+}
 
 @code {
     [CascadingParameter]
@@ -47,14 +51,18 @@
     {
         using var dbContext = dbcontextfactory.CreateDbContext();
         var a = await AuthState;
+
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
         customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
-        orderHistory = await dbContext.Purchases
-            .Where(opt => opt.CustomerId == customer.Id)
-            .Include(p => p.Restaurant)
-            .Include(p => p.PurchaseItems)
-            .ThenInclude(pi => pi.Item)
-            .ToListAsync();
+        if ((await dbContext.Purchases.Where(p => p.CustomerId == customer.Id).ToListAsync()).Count() > 0)
+        {
+            orderHistory = await dbContext.Purchases
+                .Where(opt => opt.CustomerId == customer.Id)
+                .Include(p => p.Restaurant)
+                .Include(p => p.PurchaseItems)
+                .ThenInclude(pi => pi.Item)
+                .ToListAsync();
+        }
     }
     public async Task UpdateCartAsync(int id)
     {
