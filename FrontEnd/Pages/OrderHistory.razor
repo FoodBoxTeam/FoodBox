@@ -2,6 +2,7 @@
 @using System.Security.Claims;
 @attribute [Authorize()]
 @inject IDbContextFactory<FoodBoxDB> dbcontextfactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Order History</PageTitle>
 
@@ -26,7 +27,8 @@
                 {
                     <td><img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt=""></td>
                 }
-                    <th><button class="btn-primary">Reorder</button></th>
+                    <th><button onclick="@(() => UpdateCartAsync(purchase.Id))" class="btn-primary">Reorder</button></th>
+                    @* onclick="@(() => UpdateCartAsync(purchase.Id))" *@
                 </tr>
         </tbody>
     </table>
@@ -36,7 +38,8 @@
 
 @code {
     [CascadingParameter]
-    public Task<AuthenticationState> AuthState { get; set; }
+    public Task<AuthenticationState>? AuthState { get; set; }
+    private Customer? customer { get; set; }
 
     public IEnumerable<Purchase> orderHistory { get; set; }
 
@@ -45,12 +48,71 @@
         using var dbContext = dbcontextfactory.CreateDbContext();
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
         orderHistory = await dbContext.Purchases
             .Where(opt => opt.CustomerId == customer.Id)
+            .Include(p => p.Restaurant)
             .Include(p => p.PurchaseItems)
             .ThenInclude(pi => pi.Item)
             .ToListAsync();
-        StateHasChanged();
+    }
+    public async Task UpdateCartAsync(int id)
+    {
+        using var dbContext = dbcontextfactory.CreateDbContext();
+        var purchase = orderHistory.Where(p => p.Id == id).Single();
+
+        foreach(var item in purchase.PurchaseItems)
+        {
+            await AddItemToCustomersCartAsync(customer, item.Item, purchase.Restaurant, item.ActualPrice, item.Quantity);
+        }
+
+        NavigationManager.NavigateTo("/order");
+    }
+
+    public async Task AddItemToCustomersCartAsync(Customer customer, Item item, Restaurant restaurant, decimal price, int quantity)
+    {
+        await FindCustCartAsync(customer, restaurant);
+        using var dbContext = dbcontextfactory.CreateDbContext();
+        var custCart = await dbContext.Carts.Where(c => c.Customer == customer).SingleAsync();
+        custCart = new()
+            {
+                RestaurantId = restaurant.Id,
+                CustomerId = (await dbContext.Customers.Where(c => c == customer).SingleAsync()).Id
+            };
+
+        custCart.Restaurant = restaurant;
+        await dbContext.CartItems.AddAsync(new CartItem()
+            {
+                CartId = custCart.Id,
+                ItemId = item.Id,
+                ActualPrice = price,
+                Quantity = quantity
+            });
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Cart> FindCustCartAsync(Customer customer, Restaurant restaurant)
+    {
+        using var dbContext = dbcontextfactory.CreateDbContext();
+        var carts = await dbContext.Carts.ToListAsync();
+        var customersCart = carts.Where(c => c.Customer == customer);
+
+        if(customersCart.Count() != 1)
+        {
+            var newCart = new Cart();
+
+            //newCart.Restaurant = restaurant;
+            //newCart.Customer = customer;
+            newCart.CustomerId = customer.Id;
+            newCart.RestaurantId = restaurant.Id;
+
+            dbContext.Carts.Attach(newCart);
+
+            await dbContext.SaveChangesAsync();
+            customersCart = carts.Where(c => c.Customer == customer);
+        }
+
+        return customersCart.FirstOrDefault();
     }
 }
