@@ -1,6 +1,7 @@
 ﻿@page "/order"
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject OrderState orderState
 
@@ -14,7 +15,7 @@
 </AuthorizeView>
 <!-- End Google Authorization -->
 <h3>Your Order: </h3>
-@if (orderState.ItemsInOrder.Count > 0)
+@if (cart.CartItems.Count() > 0)
 {
     <table class="table table-striped">
         <thead>
@@ -28,15 +29,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var restautantItem in orderState.ItemsInOrder)
+            @foreach (var cartItem in cart.CartItems)
             {
                 <tr>
-                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
-                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
-                    <td>@restautantItem.Quantity</td>
-                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
-                    <td>@restautantItem.PriceXQty</td>
-                    <td><a href="removeitem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
+                    <td><img src="Images/@cartItem.Item.Image" class="rounded-pill" alt="@cartItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@cartItem.Item.ItemName</td>
+                    <td>@cartItem.Quantity</td>
+                    <td><a href="edititem/@cartItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
+                    <td>@(cartItem.ActualPrice * cartItem.Quantity)</td>
+                    <td onclick="@(() => DeleteItemAsync(cartItem))" class="boxed_btn" style="color:black;">Remove</td>
                 </tr>
             }
         </tbody>
@@ -65,6 +66,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthState { get; set; }
+
     private decimal orderTotal { get; set; } = 0;
     private EventCallback<bool> OnSubmit { get; set; }
     private EventCallback OnCancel { get; set; }
@@ -72,6 +76,16 @@ else
     private List<string> orderMethods = new() { "Takeout", "Delivery" };
     public string selectedOrderMethod { get; set; } = "Takeout";
     private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private Cart cart { get; set; }
+
+    private async Task DeleteItemAsync(CartItem ci)
+    {
+        var context = ContextFactory.CreateDbContext();
+
+        context.CartItems.Delete(c => c.id == ci.Id);
+
+        await context.SaveChangesAsync();
+    }
 
     private async Task HandleValidSubmit()
     {
@@ -99,10 +113,18 @@ else
 
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnParametersSetAsync()
     {
-        orderState = MergeItemsInList(orderState);
+        var context = ContextFactory.CreateDbContext();
 
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+
+        cart = await context.Carts
+            .Where(c => c.CustomerId = customer.Id)
+            .Include(CartItems)
+            .SingleAsync();
     }
 
     private OrderState MergeItemsInList(OrderState oldOrderState)

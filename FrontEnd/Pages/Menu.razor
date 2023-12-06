@@ -4,54 +4,6 @@
 @inject OrderState OrderState
 
 <PageTitle>Menu</PageTitle>
-@* <InputSelect id="restaurant" class="form-select label-large"
-@bind-Value="@selectedFilter">
-    @foreach (var om in orderingBy)
-    {
-        <option value="@om">@om</option>
-    }
-</InputSelect> 
-@if (restaurants is not null && menuItems is not null && selectedFilter == "Salad")
-{
-    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
-    {
-        <div class="order_area">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="section_title mb-70">
-                            <h3>Menu for: @OrderState.Restaurant.RestaurantName</h3>
-                        </div>
-                    </div>
-                </div>
-                @foreach (var item in selectedRestaurant.RestaurantItems)
-                {
-                    if (new[] { 1, 7, 8, 10 }.Contains(item.Item.Id))
-                    {
-                        <div class="col-xl-4 col-md-6">
-                            <div class="single_order">
-                                <div class="order_thumb">
-                                    <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
-                                    <div class="order_prise">
-                                        <span>@item.Price</span>
-                                    </div>
-                                </div>
-                                <div class="order_info">
-                                    <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
-                                    <p>
-                                        @item.Item.Description <br>
-                                    </p>
-                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
-        </div>
-    }
-} *@
-
 
 @if (restaurants is not null && menuItems is not null)
 {
@@ -82,8 +34,8 @@
                                 <div class="order_info">
                                     <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
                                     <p>
-                                        <div class="text-black">@item.Item.Ingredients</div>
-                                        @item.Item.Description <br>
+                                        @item.Item.Ingredients
+                                        <div class="text-black">@item.Item.Description</div>
                                     </p>
                                     <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
                                 </div>

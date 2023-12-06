@@ -2,6 +2,7 @@
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
 @using FrontEnd.Pages
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
 @inject OrderState OrderState
@@ -46,6 +47,8 @@
 </EditForm>
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthState { get; set; }
     [Parameter]
     public int SelectedItemId { get; set; }
     public EventCallback<bool> OnSubmit { get; set; }
@@ -54,6 +57,7 @@
     public int quantityItem { get; set; } = 1;
     private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     OrderingItemDto selectedItemOrder { get; set; } = new();
+    private Cart cart { get; set; }
 
     private async Task HandleValidSubmit()
     {
@@ -85,7 +89,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        quantityItem = OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].Quantity;
+        var context = ContextFactory.CreateDbContext();
+
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+
+        cart = await context.Carts
+            .Where(c => c.CustomerId == customer.Id)
+            .Include(CartItems)
+            .SingleAsync();
     }
 
     private void NavigateToOrderPage()
