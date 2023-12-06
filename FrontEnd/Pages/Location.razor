@@ -6,75 +6,41 @@
 <h3>Our Locations</h3>
 
 <!--We want pictures!!!-->
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">City</th>
-            <th scope="col">Street Address</th>
-            <th scope="col">State</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Provo FoodBox SuperStore</td>
-            <td>Provo</td>
-            <td>12 s 560 e</td>
-            <td>Utah</td>
-        </tr>
-        <tr>
-            <td>Ephraim Cooking Place</td>
-            <td>Ephriam</td>
-            <td>130 s Main</td>
-            <td>Utah</td>
-        </tr>
-    </tbody>
-</table>
-
-@* @if(locations is not null)
+@if (restaurants is not null)
 {
-    <table>
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th scope="col">Name</th>
+                <th scope="col">Country</th>
+                <th scope="col">State</th>
                 <th scope="col">City</th>
                 <th scope="col">Street Address</th>
-                <th scope="col">State</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(Location l in locations)
-            {
+            @foreach (Restaurant R in restaurants)
+                {
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>@R.RestaurantName</td>
+                    <td>@R.Country</td>
+                    <td>@R.State</td>
+                    <td>@R.City</td>
+                    <td>@R.Address</td>
                 </tr>
-            }
+                }
         </tbody>
     </table>
+}
 
-}
-else
-{
-    <p>Loading...</p>
-}
- *@
+
 
 @code {
-    /*
-     
-    List<Location> locations { get; set; }
+    List<Restaurant>? restaurants { get; set; }
 
-    protected override async Task OnInitialize()
+    protected override async Task OnInitializedAsync()
     {
         var context = contextFactory.CreateDbContext();
-        await context.Location.ToListAsync();
-        //db here
-
+        restaurants = await context.Restaurants.ToListAsync();
     }
-
-     */
 }

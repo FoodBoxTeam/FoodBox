@@ -1,9 +1,149 @@
 ﻿@page "/order"
+@using FrontEnd.Data;
+@using FrontEnd.Pages.Dto;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject OrderState orderState
 
-<PageTitle>OurFavorites</PageTitle>
-
-<h3>Order here.</h3>
+<!-- Start of Google Authorization -->
+<AuthorizeView>
+    <Authorized>
+        <div>
+            Wellcome! @context.User.Identity?.Name
+        </div>
+    </Authorized>
+</AuthorizeView>
+<!-- End Google Authorization -->
+<h3>Your Order: </h3>
+@if (orderState.ItemsInOrder.Count > 0)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Picture</th>
+                <th scope="col">Name</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Price</th>
+                <th scope="col">Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var restautantItem in orderState.ItemsInOrder)
+            {
+                <tr>
+                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
+                    <td>@restautantItem.Quantity</td>
+                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
+                    <td>@restautantItem.PriceXQty</td>
+                    <td><a href="removeitem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Order Total: @orderTotal</h3>
+    <div class="container">
+        <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
+        <InputSelect id="restaurant" class="form-select label-large"
+        @bind-Value="@selectedOrderMethod">
+            @foreach (var om in orderMethods)
+            {
+                <option value="@om">@om</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
+    <button type="submit" class="primary"
+            disabled="@IsBusy" @onclick="HandleSubmit">
+        Submit
+    </button>
+    </div>
+}
+else
+{
+    <img class="emtbox" src="/Images/EmptyBox.png"/>
+}
 
 @code {
+    private decimal orderTotal { get; set; } = 0;
+    private EventCallback<bool> OnSubmit { get; set; }
+    private EventCallback OnCancel { get; set; }
+    private bool IsBusy { get; set; }
+    private List<string> orderMethods = new() { "Takeout", "Delivery" };
+    public string selectedOrderMethod { get; set; } = "Takeout";
+    private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(true);
+        }
+    }
+    private async Task HandleInvalidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(false);
+        }
+    }
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+    private async Task HandleSubmit()
+    {
+
+    }
+
+    protected override void OnInitialized()
+    {
+        orderState = MergeItemsInList(orderState);
+
+    }
+
+    private OrderState MergeItemsInList(OrderState oldOrderState)
+    {
+        List<int> containedItems = new();
+        OrderState tempOrderState = new();
+        oldOrderState.itemCounter = 0;
+
+        foreach (var orderingItem in oldOrderState.ItemsInOrder)
+        {
+            oldOrderState.itemCounter = oldOrderState.itemCounter + 1;
+            if (!containedItems.Contains(orderingItem.RestrauntItem.Id))
+            {
+                containedItems.Add(orderingItem.RestrauntItem.Id);
+                tempOrderState.ItemsInOrder.Add(orderingItem);
+            }
+            else
+            {
+                if (oldOrderState.itemCounter > oldOrderState.previousItemCount)
+                {
+                    var specifiedItem = tempOrderState.ItemsInOrder.Where(iio => iio.RestrauntItem.Id == orderingItem.RestrauntItem.Id).Single();
+                    specifiedItem.Quantity += orderingItem.Quantity;
+                    specifiedItem.PriceXQty += orderingItem.PriceXQty;
+                }
+            }
+        }
+
+        foreach (var orderingItem in tempOrderState.ItemsInOrder)
+        {
+            if (orderingItem.Quantity > 10)
+            {
+                orderingItem.Quantity = 10;
+            }
+        }
+
+        for (int i = 0; i < tempOrderState.ItemsInOrder.Count; i++)
+        {
+            orderTotal += tempOrderState.ItemsInOrder[i].PriceXQty;
+        }
+
+        oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
+        return tempOrderState;
+    }
 }

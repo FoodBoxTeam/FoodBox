@@ -16,9 +16,10 @@
                 <span class="oi oi-clipboard" aria-hidden="true"></span> Order
             </NavLink>
             @* <button type="button" href="/">
-                <img class="logo" src="images/logobetterbackground.png"   />
+                <img class="logo" src="
+                    es/logobetterbackground.png"   />
             </button> *@
-            <a href="/"><img src="images/logobetterbackground.png" style="width:6.5em;height:6.5em;"></a>
+            <a href="/"><img src="Images/logobetterbackground.png" style="width:6.5em;height:6.5em;"></a>
             <LoginDisplay />
             <NavLink class="nav-link" href="about" Match="NavLinkMatch.All">
                 <span class="oi oi-info" aria-hidden="true"></span> About
@@ -33,23 +34,27 @@
         <article class="body">
             @Body
         </article>
-        <footer>
+        <footer class="footer">
             <div class="bottom-row px-4">
-                <NavLink class="nav-link" href="order-history" Match="NavLinkMatch.All">
-                    <span class="oi oi-clock" aria-hidden="true"></span> Order History
-                </NavLink>
+                <AuthorizeView>
+                    <NavLink class="nav-link" href="order_history" Match="NavLinkMatch.All">
+                        <span class="oi oi-clock" aria-hidden="true"></span> Order History
+                    </NavLink>
+                </AuthorizeView>
                 <NavLink class="nav-link" href="policies" Match="NavLinkMatch.All">
                     <span class="oi oi-file" aria-hidden="true"></span> Policies
                 </NavLink>
-                <NavLink class="nav-link" href="locations" Match="NavLinkMatch.All">
+                <NavLink class="nav-link" href="location" Match="NavLinkMatch.All">
                     <span class="oi oi-map" aria-hidden="true"></span> Locations
                 </NavLink>
                 <NavLink class="nav-link" href="contact" Match="NavLinkMatch.All">
                     <span class="oi oi-phone" aria-hidden="true"></span> Contact
                 </NavLink>
-                <NavLink class="nav-link" href="my_favorites" Match="NavLinkMatch.All"> @*This needs to be user level only. *@
-                    <span class="oi oi-heart" aria-hidden="true"></span> My Favorites
-                </NavLink>
+                <AuthorizeView>
+                    <NavLink class="nav-link" href="my_favorites" Match="NavLinkMatch.All">
+                        <span class="oi oi-heart" aria-hidden="true"></span> My Favorites
+                    </NavLink>
+                </AuthorizeView>
                 <NavLink class="nav-link" href="our_favorites" Match="NavLinkMatch.All">
                     <span class="oi oi-list" aria-hidden="true"></span> Our Favorites
                 </NavLink>

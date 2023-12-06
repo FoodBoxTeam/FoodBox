@@ -61,6 +61,7 @@
         using var dbContext = dbcontextfactory.CreateDbContext();
         var purchase = orderHistory.Where(p => p.Id == id).Single();
 
+
         await ClearAndFindCustCartAsync(customer, purchase.Restaurant);
 
         foreach(var item in purchase.PurchaseItems)
@@ -85,18 +86,21 @@
 
         custCart.Restaurant = restaurant;
         var newCartItem = new CartItem()
+
             {
                 CartId = custCart.Id,
                 ItemId = item.Id,
                 ActualPrice = price,
                 Quantity = quantity
+
             };
 
         dbContext.CartItems.Add(newCartItem);
 
+
         await dbContext.SaveChangesAsync();
     }
-
+  
     public async Task DeleteCustCartItems(Cart cart)
     {
         using var dbContext = dbcontextfactory.CreateDbContext();

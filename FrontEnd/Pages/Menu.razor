@@ -1,132 +1,169 @@
 ﻿@page "/menu"
+@using FrontEnd.Data;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject OrderState OrderState
 
 <PageTitle>Menu</PageTitle>
+@* <InputSelect id="restaurant" class="form-select label-large"
+@bind-Value="@selectedFilter">
+    @foreach (var om in orderingBy)
+    {
+        <option value="@om">@om</option>
+    }
+</InputSelect> 
+@if (restaurants is not null && menuItems is not null && selectedFilter == "Salad")
+{
+    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
+    {
+        <div class="order_area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section_title mb-70">
+                            <h3>Menu for: @OrderState.Restaurant.RestaurantName</h3>
+                        </div>
+                    </div>
+                </div>
+                @foreach (var item in selectedRestaurant.RestaurantItems)
+                {
+                    if (new[] { 1, 7, 8, 10 }.Contains(item.Item.Id))
+                    {
+                        <div class="col-xl-4 col-md-6">
+                            <div class="single_order">
+                                <div class="order_thumb">
+                                    <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
+                                    <div class="order_prise">
+                                        <span>@item.Price</span>
+                                    </div>
+                                </div>
+                                <div class="order_info">
+                                    <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
+                                    <p>
+                                        @item.Item.Description <br>
+                                    </p>
+                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+} *@
 
-<!-- order_area_start -->
-<div class="order_area">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-12">
-                <div class="section_title mb-70">
-                    <h3>Menu</h3>
-                    <p></p>
+
+@if (restaurants is not null && menuItems is not null)
+{
+    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
+    {
+        <!-- order_area_start -->
+        <div class="order_area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section_title mb-70">
+                            <h3>Menu for: @OrderState.Restaurant.RestaurantName</h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    @foreach (var item in selectedRestaurant.RestaurantItems)
+                    {
+                        <div class="col-xl-4 col-md-6">
+                            <div class="single_order">
+                                <div class="order_thumb">
+                                    <img src="Images/@item.Item.Image" class="rounded" style="height:17em;" alt="">
+                                    <div class="order_prise">
+                                        <span>@item.Price</span>
+                                    </div>
+                                </div>
+                                <div class="order_info">
+                                    <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
+                                    <p>
+                                        <div class="text-black">@item.Item.Ingredients</div>
+                                        @item.Item.Description <br>
+                                    </p>
+                                    <a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id" class="boxed_btn">Add to Box!</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-1.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
+        <!-- order_area_end -->
+    }
+    else
+    {
+        <div class="background">
+            <div class="container">
+                <div class="screen">
+                    <div class="container" style="padding-top:3em;">
+                        <label for="restaurant" class="label-large" style="color:green">Choose Restaurant Location</label>
+                        <InputSelect id="restaurant" class="form-select label-large"
+                        @bind-Value="@selectedRestaurantId">
+                            @foreach (var rt in restaurants)
+                            {
+                                <option value="@rt.Id">@rt.RestaurantName</option>
+                            }
+                        </InputSelect>
+                    <div class="container" style="padding-top: 5em">
+                        <button class="btn" @onclick="SelectedLocation">Submit Location</button>
                     </div>
-                    <div class="order_info">
-                        <h3><a href="#">Mediterranean Salad</a></h3>
-                        <p>
-                            Naan | Peas | Olives | Peppers | Mixed Vegetables <br>
-                            Delicious Salad! <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
+                    <div class="container" style="padding-top: 2em">
+                        <p class="alert alert-danger">Please select your location</p>
                     </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-2.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Sirloin Steak</a></h3>
-                        <p>
-                            Medium Rare Steak | Or Your Choice Cooked <br>
-                            Grilled Tomatoes | Other Veggies<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-3.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Chicken Shawarma</a></h3>
-                        <p>
-                            Grilled Chicken | Falafel <br>
-                            Mixed Vegetable <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-4.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Oven Roasted Salmon</a></h3>
-                        <p>
-                            Perfectly Roasted Salmon! <br>
-                            Salad On The Side! <br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-5.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Blackberry Dreamsicle</a></h3>
-                        <p>
-                            Perfectly Frozen Ice Cream <br>
-                            With Blackberries On The Side<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 col-md-6">
-                <div class="single_order">
-                    <div class="order_thumb">
-                        <img src="images/favoriteorders/order-6.png" alt="">
-                        <div class="order_prise">
-                            <span>10.00</span>
-                        </div>
-                    </div>
-                    <div class="order_info">
-                        <h3><a href="#">Sourdough Bread</a></h3>
-                        <p>
-                            Perfectly Baked Sourdough<br>
-                            Salt and Grain On The Side<br>
-                        </p>
-                        <a href="#" class="boxed_btn">Order Now!</a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- order_area_end -->
+    }
+}
+else
+{
+    <div>Loading...</div>
+}
 
 @code {
+    [Parameter]
+    public int Id { get; set; }
+    private string ItemName { get; set; } = null!;
+    private string? Description { get; set; }
+    private Restaurant? selectedRestaurant { get; set; }
+    private int selectedRestaurantId { get; set; } = -1;
+    private List<Item> menuItems { get; set; }
+    private List<Restaurant> restaurants { get; set; }
+    private string[] orderingBy = new string[] { "Salad", "Main Dish", "Soup", "Apple", "Shake","Dessert"};
+    private string selectedFilter { get; set; } = "Takeout";
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = ContextFactory.CreateDbContext();
+        menuItems = await context.Items.ToListAsync();
+        restaurants = await context.Restaurants
+            .Include(ri => ri.RestaurantItems)
+            .OrderBy(ri => ri.Id)
+            .ToListAsync();
+        await refreshAsync();
 
+        if(OrderState.Restaurant is not null)
+        {
+            selectedRestaurant = OrderState.Restaurant;
+        }
+    }
+    async Task refreshAsync()
+    {
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    public void SelectedLocation()
+    {
+        if(selectedRestaurantId != -1)
+        {
+            selectedRestaurant = restaurants.Where(r => r.Id == selectedRestaurantId).Single();
+            OrderState.Restaurant = selectedRestaurant;
+        }
+    }
 }
