@@ -100,14 +100,15 @@
 
         if(customersCart.Count() != 1)
         {
-            var newCart = new Cart();
+            var newCart = new Cart() { CustomerId = customer.Id, RestaurantId = restaurant.Id };
+            //var newCart = new Cart() { Id = 1, Customer = customer, Restaurant = restaurant };
 
             //newCart.Restaurant = restaurant;
             //newCart.Customer = customer;
-            newCart.CustomerId = customer.Id;
-            newCart.RestaurantId = restaurant.Id;
+            //newCart.CustomerId = customer.Id;
+            //newCart.RestaurantId = restaurant.Id;
 
-            dbContext.Carts.Attach(newCart);
+            dbContext.Carts.Add(newCart);
 
             await dbContext.SaveChangesAsync();
             customersCart = carts.Where(c => c.Customer == customer);
