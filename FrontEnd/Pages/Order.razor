@@ -1,7 +1,9 @@
 ﻿@page "/order"
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject NavigationManager NavigationManager
 @inject OrderState orderState
 
 <!-- Start of Google Authorization -->
@@ -14,7 +16,7 @@
 </AuthorizeView>
 <!-- End Google Authorization -->
 <h3>Your Order: </h3>
-@if (orderState.ItemsInOrder.Count > 0)
+@if (cart is not null && cart.CartItems.Count() > 0)
 {
     <table class="table table-striped">
         <thead>
@@ -28,30 +30,20 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var restautantItem in orderState.ItemsInOrder)
+            @foreach (var cartItem in cart.CartItems)
             {
                 <tr>
-                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
-                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
-                    <td>@restautantItem.Quantity</td>
-                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
-                    <td>@restautantItem.PriceXQty</td>
-                    <td><a href="removeitem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
+                    <td><img src="Images/@cartItem.Item.Image" class="rounded-pill" alt="@cartItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@cartItem.Item.ItemName</td>
+                    <td>@cartItem.Quantity</td>
+                    <td><a href="edititem/@cartItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
+                    <td>@(cartItem.ActualPrice * cartItem.Quantity)</td>
+                    <td><a href="/removeItem/@cartItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
                 </tr>
             }
         </tbody>
     </table>
     <h3>Order Total: @orderTotal</h3>
-    <div class="container">
-        <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
-        <InputSelect id="restaurant" class="form-select label-large"
-        @bind-Value="@selectedOrderMethod">
-            @foreach (var om in orderMethods)
-            {
-                <option value="@om">@om</option>
-            }
-        </InputSelect>
-    </div>
     <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
     <button type="submit" class="primary"
             disabled="@IsBusy" @onclick="HandleSubmit">
@@ -65,6 +57,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthState { get; set; }
+
     private decimal orderTotal { get; set; } = 0;
     private EventCallback<bool> OnSubmit { get; set; }
     private EventCallback OnCancel { get; set; }
@@ -72,6 +67,15 @@ else
     private List<string> orderMethods = new() { "Takeout", "Delivery" };
     public string selectedOrderMethod { get; set; } = "Takeout";
     private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private Cart cart { get; set; }
+
+    private async Task DeleteItemAsync(CartItem ci)
+    {
+        var context = ContextFactory.CreateDbContext();
+        await context.CartItems.Where(c => c.Id == ci.Id).ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/order");
+    }
 
     private async Task HandleValidSubmit()
     {
@@ -94,15 +98,29 @@ else
             await OnCancel.InvokeAsync();
         }
     }
-    private async Task HandleSubmit()
+    private void HandleSubmit()
     {
-
+        NavegateToCustomerPayment();
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        orderState = MergeItemsInList(orderState);
+        var context = ContextFactory.CreateDbContext();
 
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+
+        cart = await context.Carts
+            .Where(c => c.CustomerId == customer.Id)
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Item)
+            .SingleAsync();
+
+        @foreach (var cartItem in cart.CartItems)
+        {
+            orderTotal = orderTotal + (cartItem.ActualPrice * cartItem.Quantity);
+        }
     }
 
     private OrderState MergeItemsInList(OrderState oldOrderState)
@@ -145,5 +163,9 @@ else
 
         oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
         return tempOrderState;
+    }
+    private void NavegateToCustomerPayment()
+    {
+        NavigationManager.NavigateTo($"/CustomerPayment");
     }
 }
