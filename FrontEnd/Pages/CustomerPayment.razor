@@ -39,10 +39,10 @@
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
         <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
-        @bind-Value="@IsDilivery">
+        @bind-Value="IsDilivery">
             @foreach (var om in orderMethods)
             {
-                <option value="@om.Item2">@om.Item1</option>
+                <option value="@om">@om</option>
             }
         </InputSelect>
     </div>
@@ -93,7 +93,7 @@
 
     @* <-->This is for the addresses</--> *@
 
-    @if (IsDilivery)
+    @if (IsDilivery == "Delivery")
     {
         <!-- Header Section -->
         @* <header class="bg-dark text-white text-center p-4">
@@ -200,19 +200,18 @@ else
     private EventCallback<bool> OnSubmit { get; set; }
     private EventCallback OnCancel { get; set; }
     private bool IsBusy { get; set; }
-    private List<(string, bool)> orderMethods = new() { ("Takeout", false), ("Delivery", true) };
+    private List<string> orderMethods = new() { "Takeout", "Delivery" };
     private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    private bool isDelivered { get; set; } = true;
     bool PopupVisible { get; set; }
     private Cart cart { get; set; }
     private CartItem cartItem { get; set; }
     private Customer customer { get; set; }
-    bool IsDilivery { get; set; } = true;
+    string IsDilivery { get; set; } = "Delivery";
     string cardNumber { get; set; }
     string name { get; set; }
     string address { get; set; }
     int cvv { get; set; }
-    DateOnly date { get; set; }
+    DateOnly date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     private List<PurchaseItem> finalPurchaseItems = new();
 
     [CascadingParameter]
@@ -246,7 +245,7 @@ else
     {
         if(!IsBusy && cardNumber is not null && name is not null)
         {
-            if((IsDilivery && address is not null) || !IsDilivery)
+            if ((IsDilivery == "Delivery" && address is not null) || IsDilivery == "Takeout")
             {
                 IsBusy = true;
                 await FinishPurchase();
@@ -299,7 +298,7 @@ else
             NavigationManager.NavigateTo("/Confirmation");
         }
     }
-
+    /*
     private void SelectedOrderMethodUser()
     {
         if (IsDilivery)
@@ -311,6 +310,7 @@ else
             isDelivered =  false; 
         }
     }
+     */
 
     private async Task<Purchase> AddPurchase()
     {
