@@ -45,7 +45,7 @@
     <h3>Order Total: @orderTotal</h3>
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
-        <InputSelect id="restaurant" class="form-select label-large"
+        <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
         @bind-Value="@selectedOrderMethod">
             @foreach (var om in orderMethods)
             {
@@ -54,76 +54,60 @@
         </InputSelect>
     </div>
     @* <-->This is for the addresses</--> *@
+
     @if (selectedOrderMethod == "Delivery")
     {
-        <div class="wrapper">
-            <div class="container">
-                <form action="">
-                    <h1>
-                        <i class="fas fa-shipping-fast"></i>
-                        Shipping Details
-                    </h1>
-                    <div class="name">
-                        <div>
-                            <label for="f-name">First</label>
-                            <input type="text" name="f-name">
+        <!-- Header Section -->
+        @* <header class="bg-dark text-white text-center p-4">
+            Customer Address and Payment
+        </header> *@
+        <!-- Address and Payment Form -->
+        <section class="container mt-5" id="customer-form">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h2>
+                        Enter Your Address and Payment Details
+                    </h2>
+                    <form id="customerForm">
+                        <div class="form-group">
+                            <label for="fullName">
+                                Full Name:
+                            </label>
+                            <input class="form-control" id="fullName" placeholder="John Doe" required="" type="text" />
                         </div>
-                        <div>
-                            <label for="l-name">Last</label>
-                            <input type="text" name="l-name">
+                        <div class="form-group">
+                            <label for="address">
+                                Address:
+                            </label>
+                            <textarea class="form-control" id="address" placeholder="Enter your address" required=""></textarea>
                         </div>
-                    </div>
-                    <div class="street">
-                        <label for="name">Street</label>
-                        <input type="text" name="address">
-                    </div>
-                    <div class="address-info">
-                        <div>
-                            <label for="city">City</label>
-                            <input type="text" name="city">
+                        <div class="form-group">
+                            <label for="cardNumber">
+                                Card Number:
+                            </label>
+                            <input class="form-control" id="cardNumber" maxlength="19" placeholder="1234 5678 1234 5678" required="" type="text" />
                         </div>
-                        <div>
-                            <label for="state">State</label>
-                            <input type="text" name="state">
+                        <div class="form-group">
+                            <label for="expiryDate">
+                                Expiry Date:
+                            </label>
+                            <input class="form-control" id="expiryDate" required="" type="month" />
                         </div>
-                        <div>
-                            <label for="zip">Zip</label>
-                            <input type="text" name="zip">
+                        <div class="form-group">
+                            <label for="cvv">
+                                CVV:
+                            </label>
+                            <input class="form-control" id="cvv" maxlength="3" placeholder="123" required="" type="number" />
                         </div>
-                    </div>
-                    <h1>
-                        <i class="far fa-credit-card"></i> Payment Information
-                    </h1>
-                    <div class="cc-num">
-                        <label for="card-num">Credit Card No.</label>
-                        <input type="text" name="card-num">
-                    </div>
-                    <div class="cc-info">
-                        <div>
-                            <label for="card-num">Exp</label>
-                            <input type="text" name="expire">
-                        </div>
-                        <div>
-                            <label for="card-num">CCV</label>
-                            <input type="text" name="security">
-                        </div>
-                    </div>
-                    <div class="btns">
-                        <button>Purchase</button>
-                        <button>Back to cart</button>
-                    </div>
-                </form>
+                        <button class="btn btn-primary w-100" type="submit"
+                                disabled="@IsBusy" @onclick="HandleSubmit">
+                            Submit
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+        </section>
     }
-    
-
-    <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
-        <button type="submit" class="primary"
-                disabled="@IsBusy" @onclick="HandleSubmit">
-            Submit
-        </button>
-    </div>
 }
 else
 {
@@ -142,6 +126,9 @@ else
     private bool isDelivered { get; set; } = true;
     bool PopupVisible { get; set; }
     private Cart cart { get; set; }
+    private CartItem cartItem { get; set; }
+    private Customer customer { get; set; }
+    private List<PurchaseItem> finalPurchaseItems = new();
 
     [CascadingParameter]
     public Task<AuthenticationState>? AuthState { get; set; }
@@ -172,7 +159,7 @@ else
     }
     private async Task HandleSubmit()
     {
-
+        await ClearCardItem();
     }
 
     protected override async Task OnInitializedAsync()
@@ -181,7 +168,7 @@ else
 
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
 
         cart = await context.Carts
             .Where(c => c.CustomerId == customer.Id)
@@ -231,6 +218,7 @@ else
         oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
         return tempOrderState;
     }
+
     private void SelectedOrderMethodUser()
     {
         if (selectedOrderMethod == "Delivery")
@@ -245,4 +233,44 @@ else
         }
     }
 
+    private async Task<Purchase> AddPurchase()
+    {
+        var dbcontext = ContextFactory.CreateDbContext();
+        ICollection<PurchaseItem> purchaseItems1 = cart.CartItems.Cast<PurchaseItem>().ToList();
+
+        var purchase = new Purchase()
+            {
+                PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
+                CustomerId = customer.Id,
+                RestaurantId = cart.RestaurantId
+            };
+        foreach (var purchaseItem in purchaseItems1)
+        {
+            finalPurchaseItems.Add(new PurchaseItem()
+                {
+                    Id = cart.Id,
+                    PurchaseId = purchase.Id,
+                    ItemId = purchaseItem.ItemId,
+                    Quantity = purchaseItem.Quantity,
+                    ActualPrice = purchaseItem.ActualPrice
+
+                });
+        }
+
+        await dbcontext.PurchaseItems.AddRangeAsync(finalPurchaseItems);
+        await dbcontext.SaveChangesAsync();
+
+        return purchase;
+    }
+    public async Task<CartItem> ClearCardItem()
+    {
+        await AddPurchase();
+        await DeleteCard();
+        return cartItem;
+    }
+    public async Task DeleteCard()
+    {
+        using var dbContext = ContextFactory.CreateDbContext();
+        await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
+    }
 }
