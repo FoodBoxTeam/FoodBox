@@ -3,6 +3,7 @@
 @using FrontEnd.Pages.Dto;
 @using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject NavigationManager NavigationManager
 @inject OrderState orderState
 
 <!-- Start of Google Authorization -->
@@ -15,7 +16,7 @@
 </AuthorizeView>
 <!-- End Google Authorization -->
 <h3>Your Order: </h3>
-@if (cart.CartItems.Count() > 0)
+@if (cart is not null && cart.CartItems.Count() > 0)
 {
     <table class="table table-striped">
         <thead>
@@ -37,22 +38,12 @@
                     <td>@cartItem.Quantity</td>
                     <td><a href="edititem/@cartItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
                     <td>@(cartItem.ActualPrice * cartItem.Quantity)</td>
-                    <td onclick="@(() => DeleteItemAsync(cartItem))" class="boxed_btn" style="color:black;">Remove</td>
+                    <td><a href="/removeItem/@cartItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
                 </tr>
             }
         </tbody>
     </table>
     <h3>Order Total: @orderTotal</h3>
-    <div class="container">
-        <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
-        <InputSelect id="restaurant" class="form-select label-large"
-        @bind-Value="@selectedOrderMethod">
-            @foreach (var om in orderMethods)
-            {
-                <option value="@om">@om</option>
-            }
-        </InputSelect>
-    </div>
     <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
     <button type="submit" class="primary"
             disabled="@IsBusy" @onclick="HandleSubmit">
@@ -81,10 +72,9 @@ else
     private async Task DeleteItemAsync(CartItem ci)
     {
         var context = ContextFactory.CreateDbContext();
-
-        context.CartItems.Delete(c => c.id == ci.Id);
-
+        await context.CartItems.Where(c => c.Id == ci.Id).ExecuteDeleteAsync();
         await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/order");
     }
 
     private async Task HandleValidSubmit()
@@ -108,12 +98,12 @@ else
             await OnCancel.InvokeAsync();
         }
     }
-    private async Task HandleSubmit()
+    private void HandleSubmit()
     {
-
+        NavegateToCustomerPayment();
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         var context = ContextFactory.CreateDbContext();
 
@@ -122,9 +112,15 @@ else
         var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
 
         cart = await context.Carts
-            .Where(c => c.CustomerId = customer.Id)
-            .Include(CartItems)
+            .Where(c => c.CustomerId == customer.Id)
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Item)
             .SingleAsync();
+
+        @foreach (var cartItem in cart.CartItems)
+        {
+            orderTotal = orderTotal + (cartItem.ActualPrice * cartItem.Quantity);
+        }
     }
 
     private OrderState MergeItemsInList(OrderState oldOrderState)
@@ -167,5 +163,9 @@ else
 
         oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
         return tempOrderState;
+    }
+    private void NavegateToCustomerPayment()
+    {
+        NavigationManager.NavigateTo($"/CustomerPayment");
     }
 }

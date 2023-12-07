@@ -4,7 +4,6 @@
 @using FrontEnd.Pages
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState OrderState
 
 
 <EditForm Model="selectedItemOrder">
@@ -27,7 +26,7 @@
                             </div>
                             <div class="app-form-group buttons">
                                 <button type="submit" class="app-form-button" style="color: red;"
-                                        disabled="@IsBusy" @onclick="HandleSubmit">
+                                        disabled="@IsBusy" onclick="@(() => HandleSubmitAsync())">
                                     Submit
                                 </button>
                             </div>
@@ -70,13 +69,16 @@
             await OnCancel.InvokeAsync();
         }
     }
-    private void HandleSubmit()
+
+    private async Task HandleSubmitAsync()
     {
-        var tempItem = OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0];
         if (selectedOption == "Yes")
         {
-            OrderState.ItemsInOrder.Remove(tempItem);
+            var context = ContextFactory.CreateDbContext();
+            await context.CartItems.Where(c => c.Id == SelectedItemId).ExecuteDeleteAsync();
+            await context.SaveChangesAsync();
         }
+
         NavigateToOrderPage();
     }
 

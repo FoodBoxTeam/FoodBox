@@ -259,15 +259,23 @@ public partial class FoodBoxDB : IdentityDbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ItemId).HasColumnName("item_id");
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
+
             entity.Property(e => e.ActualPrice)
                 .HasColumnType("money")
                 .HasColumnName("actual_price");
+
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
             entity.HasOne(d => d.Item).WithMany(p => p.CartItems)
                 .HasForeignKey(d => d.ItemId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("cart_item_item_id_fkey");
+
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.CartId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("cart_item_cart_id_fkey");
         });
 
         modelBuilder.Entity<Cart>(entity =>

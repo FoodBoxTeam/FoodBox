@@ -5,45 +5,46 @@
 @using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState OrderState
 
 
 <EditForm Model="selectedItemOrder">
     <DataAnnotationsValidator />
-    <div class="background">
-        <div class="container">
-            <div class="screen">
-
-                <div class="screen-body">
-                    <div class="screen-body-item left">
-                        <div class="app-title">
-                            <span>@OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].RestrauntItem.Item.ItemName</span>
-                        </div>
-                    </div>
-                    <div class="screen-body-item">
-                        <div class="app-form">
-                            <div class="app-form-group">
-                                <InputSelect id="quantity" class="form-control"
-                                @bind-Value="@quantityItem">
-                                    @foreach (int num in quantity)
-                                    {
-                                        <option value="@num">@num</option>
-                                    }
-                                </InputSelect>
+    @if (cart is not null)
+    {
+        <div class="background">
+            <div class="container">
+                <div class="screen">
+                    <div class="screen-body">
+                        <div class="screen-body-item left">
+                            <div class="app-title">
+                                <span>@cart.CartItems.Where(id => id.Id == SelectedItemId).ToList()[0].Item.ItemName</span>
                             </div>
-                            <div class="app-form-group buttons">
-                                <button type="submit" class="app-form-button"
-                                        disabled="@IsBusy" @onclick="HandleSubmit">
-                                    Submit
-                                </button>
-                                <div style="color:grey;">Price: @(quantityItem * OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].RestrauntItem.Price)</div>
+                        </div>
+                        <div class="screen-body-item">
+                            <div class="app-form">
+                                <div class="app-form-group">
+                                    <InputSelect id="quantity" class="form-control"
+                                    @bind-Value="@quantityItem">
+                                        @foreach (int num in quantity)
+                                        {
+                                            <option value="@num">@num</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="app-form-group buttons">
+                                    <button type="submit" class="app-form-button"
+                                            disabled="@IsBusy" onclick="@(() => HandleSubmitAsync())">
+                                        Submit
+                                    </button>
+                                    <div style="color:grey;">Price: @(quantityItem * cart.CartItems.Where(id => id.Id == SelectedItemId).ToList()[0].ActualPrice)</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 </EditForm>
 
 @code {
@@ -80,25 +81,29 @@
             await OnCancel.InvokeAsync();
         }
     }
-    private void HandleSubmit()
+
+    private async Task HandleSubmitAsync()
     {
-        OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].Quantity = quantityItem;
-        OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].PriceXQty = quantityItem * OrderState.ItemsInOrder.Where(id => id.RestrauntItem.Id == SelectedItemId).ToList()[0].RestrauntItem.Price;
+        var context = ContextFactory.CreateDbContext();
+        var tempCartItem = await context.CartItems.Where(c => c.Id == SelectedItemId).SingleAsync();
+        tempCartItem.Quantity = quantityItem;
+        await context.SaveChangesAsync();
         NavigateToOrderPage();
     }
 
     protected override async Task OnInitializedAsync()
     {
         var context = ContextFactory.CreateDbContext();
-
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
 
         cart = await context.Carts
             .Where(c => c.CustomerId == customer.Id)
-            .Include(CartItems)
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Item)
             .SingleAsync();
+        quantityItem = cart.CartItems.Where(id => id.Id == SelectedItemId).ToList()[0].Quantity;
     }
 
     private void NavigateToOrderPage()
