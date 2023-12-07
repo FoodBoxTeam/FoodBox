@@ -18,6 +18,8 @@
 <h3>Your Order: </h3>
 @if (cart is not null && cart.CartItems.Count() > 0)
 {
+    <button class="btn-warning" onclick="@(async Task () => await DeleteAllItems())">Delete All Items in Cart</button>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -103,7 +105,7 @@ else
         NavegateToCustomerPayment();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         var context = ContextFactory.CreateDbContext();
 
@@ -128,7 +130,7 @@ else
         }
 
         var oh = new OrderHistory(ContextFactory);
-        cart = await oh.FindCustCartAsync(customer, (await context.Restaurants.FirstOrDefaultAsync()));
+        cart = await oh.FindCustCartAsync(customer);
 
         @foreach (var cartItem in cart.CartItems)
         {
@@ -175,5 +177,12 @@ else
     private void NavegateToCustomerPayment()
     {
         NavigationManager.NavigateTo($"/CustomerPayment");
+    }
+    
+    private async Task DeleteAllItems()
+    {
+        var oh = new OrderHistory(ContextFactory);
+        await oh.DeleteCustCartItems(cart);
+        NavigationManager.NavigateTo("/order");
     }
 }

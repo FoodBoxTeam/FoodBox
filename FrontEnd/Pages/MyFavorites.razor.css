@@ -222,34 +222,6 @@ h3 {
         margin-bottom: 0;
         margin-bottom: 30px;
     }
-
-    .order_area .single_order .order_thumb .order_like {
-        position: absolute;
-        left: 10px;
-        bottom: 10px;
-        background: #fff;
-        color: orangered;
-        padding: 17px 21px 13px 24px;
-        border-radius: 5px;
-        font-weight: 600;
-        font-size: 18px;
-        margin-bottom: 0;
-        line-height: 18px;
-    }
-
-    .order_area .single_order .order_thumb .order_love {
-        position: absolute;
-        left: 10px;
-        bottom: 10px;
-        background: orangered;
-        color: #fff;
-        padding: 17px 21px 13px 24px;
-        border-radius: 5px;
-        font-weight: 600;
-        font-size: 18px;
-        margin-bottom: 0;
-        line-height: 18px;
-    }
 /*This is from the Title*/
 .section_title h3 {
     font-size: 60px;
