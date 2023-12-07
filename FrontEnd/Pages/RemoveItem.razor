@@ -14,7 +14,7 @@
                 <div class="screen-body">
                     <div class="screen-body-item">
                         <div class="app-form">
-                            <div class="app-form-group" style="color: red;">
+                            <h4 class="app-form-group" style="color: red;">
                                 Remove Item?
                                 <InputSelect id="quantity" class="form-control"
                                 @bind-Value="@selectedOption">
@@ -23,7 +23,7 @@
                                         <option value="@option">@option</option>
                                     }
                                 </InputSelect>
-                            </div>
+                            </h4>
                             <div class="app-form-group buttons">
                                 <button type="submit" class="app-form-button" style="color: red;"
                                         disabled="@IsBusy" onclick="@(() => HandleSubmitAsync())">

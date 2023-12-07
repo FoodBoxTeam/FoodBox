@@ -2,18 +2,10 @@
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
 @using System.Security.Claims;
+@using System.ComponentModel.DataAnnotations
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
 
-<!-- Start of Google Authorization -->
-<AuthorizeView>
-    <Authorized>
-        <div>
-            Wellcome! @context.User.Identity?.Name
-        </div>
-    </Authorized>
-</AuthorizeView>
-<!-- End Google Authorization -->
 <h3>Your Order: </h3>
 @if (cart is not null && cart.CartItems.Count() > 0)
 {
@@ -47,16 +39,61 @@
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
         <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
-        @bind-Value="@selectedOrderMethod">
+        @bind-Value="@IsDilivery">
             @foreach (var om in orderMethods)
             {
-                <option value="@om">@om</option>
+                <option value="@om.Item2">@om.Item1</option>
             }
         </InputSelect>
     </div>
+    @*
+    @if(payment is not null)
+    {
+        <EditForm Model="payment" id="customerForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="fullName">
+                    Full Name:
+                </label>
+                <InputText class="form-control" id="fullName" placeholder="John Doe" @bind-value="payment.Name" />
+            </div>
+            <div class="form-group">
+                <label for="address">
+                    Address:
+                </label>
+                <InputText class="form-control" id="address" placeholder="Enter your address" @bind-value="payment.Address" />
+            </div>
+            <div class="form-group">
+                <label for="cardNumber">
+                    Card Number:
+                </label>
+                <InputText class="form-control" id="cardNumber" @bind-value="payment.CardNumber" maxlength="19" placeholder="1234 5678 1234 5678" required="" type="text" />
+            </div>
+            <div class="form-group">
+                <label for="expiryDate">
+                    Expiry Date:
+                </label>
+                <InputDate class="form-control" id="expiryDate" @bind-value="payment.ExpirationDate" TValue="DateOnly" />
+            </div>
+            <div class="form-group">
+                <label for="cvv">
+                    CVV:
+                </label>
+                <InputNumber class="form-control" id="cvv" maxlength="3" @bind-value="payment.Cvv" placeholder="123" TValue="int" />
+            </div>
+            <button class="btn btn-primary w-100" type="submit"
+                    @onselect="HandleSubmit"
+                    disabled="@IsBusy">
+                Submit
+            </button>
+        </EditForm>
+    } *@
+
     @* <-->This is for the addresses</--> *@
 
-    @if (selectedOrderMethod == "Delivery")
+    @if (IsDilivery)
     {
         <!-- Header Section -->
         @* <header class="bg-dark text-white text-center p-4">
@@ -74,13 +111,13 @@
                             <label for="fullName">
                                 Full Name:
                             </label>
-                            <input class="form-control" id="fullName" placeholder="John Doe" required="" type="text" />
+                            <input class="form-control" id="fullName" @bind-value="name" placeholder="John Doe" required="" type="text" />
                         </div>
                         <div class="form-group">
                             <label for="address">
                                 Address:
                             </label>
-                            <textarea class="form-control" id="address" placeholder="Enter your address" required=""></textarea>
+                            <input class="form-control" id="address" @bind-value="address" placeholder="Enter your address" type="text" required=""></input>
                         </div>
                         <div class="form-group">
                             <label for="cardNumber">
@@ -92,13 +129,13 @@
                             <label for="expiryDate">
                                 Expiry Date:
                             </label>
-                            <input class="form-control" id="expiryDate" required="" type="month" />
+                            <input class="form-control" id="expiryDate" @bind-value="date" required="" type="month" />
                         </div>
                         <div class="form-group">
                             <label for="cvv">
                                 CVV:
                             </label>
-                            <input class="form-control" id="cvv" maxlength="3" placeholder="123" required="" type="number" />
+                            <input class="form-control" id="cvv" maxlength="3" @bind-value="cvv" placeholder="123" required="" type="number" />
                         </div>
                         <button class="btn btn-primary w-100" type="submit"
                                 disabled="@IsBusy" onclick="@(async Task () => await HandleSubmit())">
@@ -122,7 +159,7 @@
                             <label for="fullName">
                                 Full Name:
                             </label>
-                            <input class="form-control" id="fullName" placeholder="John Doe" required="" type="text" />
+                            <input class="form-control" id="fullName" @bind-value="name" placeholder="John Doe" required="" type="text" />
                         </div>
                         <div class="form-group">
                             <label for="cardNumber">
@@ -134,7 +171,7 @@
                             <label for="expiryDate">
                                 Expiry Date:
                             </label>
-                            <input class="form-control" id="expiryDate" required="" type="month" />
+                            <input class="form-control" @bind-value="date" id="expiryDate" required="" type="month" />
                         </div>
                         <div class="form-group">
                             <label for="cvv">
@@ -158,20 +195,24 @@ else
 }
 
 @code {
+    //Payment payment { get; set; }
     private decimal orderTotal { get; set; } = 0;
     private EventCallback<bool> OnSubmit { get; set; }
     private EventCallback OnCancel { get; set; }
     private bool IsBusy { get; set; }
-    private List<string> orderMethods = new() { "Takeout", "Delivery" };
-    public string selectedOrderMethod { get; set; } = "Delivery";
+    private List<(string, bool)> orderMethods = new() { ("Takeout", false), ("Delivery", true) };
     private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    private string userAddress { get; set; }
     private bool isDelivered { get; set; } = true;
     bool PopupVisible { get; set; }
     private Cart cart { get; set; }
     private CartItem cartItem { get; set; }
     private Customer customer { get; set; }
+    bool IsDilivery { get; set; } = true;
     string cardNumber { get; set; }
+    string name { get; set; }
+    string address { get; set; }
+    int cvv { get; set; }
+    DateOnly date { get; set; }
     private List<PurchaseItem> finalPurchaseItems = new();
 
     [CascadingParameter]
@@ -203,15 +244,22 @@ else
     }
     private async Task HandleSubmit()
     {
-        if(cardNumber is not null)
+        if(!IsBusy && cardNumber is not null && name is not null)
         {
-            await FinishPurchase();
-            NavigationManager.NavigateTo("/Confirmation");
+            if((IsDilivery && address is not null) || !IsDilivery)
+            {
+                IsBusy = true;
+                await FinishPurchase();
+                IsBusy = false;
+                cart = null;
+                NavigationManager.NavigateTo("/Confirmation", forceLoad: true);
+            }
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
+        //payment = new();
         var context = ContextFactory.CreateDbContext();
 
         var a = await AuthState;
@@ -254,14 +302,12 @@ else
 
     private void SelectedOrderMethodUser()
     {
-        if (selectedOrderMethod == "Delivery")
+        if (IsDilivery)
         {
-            userAddress = selectedOrderMethod;
             isDelivered = true;
         }
         else
         {
-
             isDelivered =  false; 
         }
     }
@@ -280,7 +326,7 @@ else
         await dbcontext.SaveChangesAsync();
 
         purchase = (await dbcontext.Purchases.Where(p => p.CustomerId == customer.Id)
-            .ToListAsync()).MaxBy(p => p.PurchaseDate);
+            .ToListAsync()).MaxBy(p => p.Id);
 
         List<PurchaseItem> purchaseItems = ParseCartItemsIntoPurchaseItems(cart.CartItems, purchase.Id);
 
@@ -302,6 +348,7 @@ else
     {
         await AddPurchase();
         await DeleteCartItems();
+        cart.CartItems = new List<CartItem>();
     }
 
     private List<PurchaseItem> ParseCartItemsIntoPurchaseItems(IEnumerable<CartItem> ciList, int purchaseId)
