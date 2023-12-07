@@ -1,0 +1,235 @@
+﻿@page "/CustomerPayment"
+@using FrontEnd.Data;
+@using FrontEnd.Pages.Dto;
+@inject IDbContextFactory<FoodBoxDB> ContextFactory
+@inject NavigationManager NavigationManager
+@inject OrderState orderState
+
+<!-- Start of Google Authorization -->
+<AuthorizeView>
+    <Authorized>
+        <div>
+            Wellcome! @context.User.Identity?.Name
+        </div>
+    </Authorized>
+</AuthorizeView>
+<!-- End Google Authorization -->
+<h3>Your Order: </h3>
+@if (orderState.ItemsInOrder.Count > 0)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Picture</th>
+                <th scope="col">Name</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Price</th>
+                <th scope="col">Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var restautantItem in orderState.ItemsInOrder)
+            {
+                <tr>
+                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
+                    <td>@restautantItem.Quantity</td>
+                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
+                    <td>@restautantItem.PriceXQty</td>
+                    <td><a href="removeitem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Order Total: @orderTotal</h3>
+    <div class="container">
+        <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
+        <InputSelect id="restaurant" class="form-select label-large"
+        @bind-Value="@selectedOrderMethod">
+            @foreach (var om in orderMethods)
+            {
+                <option value="@om">@om</option>
+            }
+        </InputSelect>
+    </div>
+    @* <-->This is for the addresses</--> *@
+    @if (selectedOrderMethod == "Delivery")
+    {
+        <div class="wrapper">
+            <div class="container">
+                <form action="">
+                    <h1>
+                        <i class="fas fa-shipping-fast"></i>
+                        Shipping Details
+                    </h1>
+                    <div class="name">
+                        <div>
+                            <label for="f-name">First</label>
+                            <input type="text" name="f-name">
+                        </div>
+                        <div>
+                            <label for="l-name">Last</label>
+                            <input type="text" name="l-name">
+                        </div>
+                    </div>
+                    <div class="street">
+                        <label for="name">Street</label>
+                        <input type="text" name="address">
+                    </div>
+                    <div class="address-info">
+                        <div>
+                            <label for="city">City</label>
+                            <input type="text" name="city">
+                        </div>
+                        <div>
+                            <label for="state">State</label>
+                            <input type="text" name="state">
+                        </div>
+                        <div>
+                            <label for="zip">Zip</label>
+                            <input type="text" name="zip">
+                        </div>
+                    </div>
+                    <h1>
+                        <i class="far fa-credit-card"></i> Payment Information
+                    </h1>
+                    <div class="cc-num">
+                        <label for="card-num">Credit Card No.</label>
+                        <input type="text" name="card-num">
+                    </div>
+                    <div class="cc-info">
+                        <div>
+                            <label for="card-num">Exp</label>
+                            <input type="text" name="expire">
+                        </div>
+                        <div>
+                            <label for="card-num">CCV</label>
+                            <input type="text" name="security">
+                        </div>
+                    </div>
+                    <div class="btns">
+                        <button>Purchase</button>
+                        <button>Back to cart</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    
+
+    <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
+        <button type="submit" class="primary"
+                disabled="@IsBusy" @onclick="HandleSubmit">
+            Submit
+        </button>
+    </div>
+}
+else
+{
+    <img class="emtbox" src="/Images/EmptyBox.png" />
+}
+
+@code {
+    private decimal orderTotal { get; set; } = 0;
+    private EventCallback<bool> OnSubmit { get; set; }
+    private EventCallback OnCancel { get; set; }
+    private bool IsBusy { get; set; }
+    private List<string> orderMethods = new() { "Takeout", "Delivery" };
+    public string selectedOrderMethod { get; set; } = "Delivery";
+    private int[] quantity = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private string userAddress { get; set; }
+    private bool isDelivered { get; set; } = true;
+    bool PopupVisible { get; set; }
+
+
+    //private int
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(true);
+        }
+    }
+    private async Task HandleInvalidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(false);
+        }
+    }
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+    private async Task HandleSubmit()
+    {
+
+    }
+
+    protected override void OnInitialized()
+    {
+        orderState = MergeItemsInList(orderState);
+
+    }
+
+    private OrderState MergeItemsInList(OrderState oldOrderState)
+    {
+        List<int> containedItems = new();
+        OrderState tempOrderState = new();
+        oldOrderState.itemCounter = 0;
+
+        foreach (var orderingItem in oldOrderState.ItemsInOrder)
+        {
+            oldOrderState.itemCounter = oldOrderState.itemCounter + 1;
+            if (!containedItems.Contains(orderingItem.RestrauntItem.Id))
+            {
+                containedItems.Add(orderingItem.RestrauntItem.Id);
+                tempOrderState.ItemsInOrder.Add(orderingItem);
+            }
+            else
+            {
+                if (oldOrderState.itemCounter > oldOrderState.previousItemCount)
+                {
+                    var specifiedItem = tempOrderState.ItemsInOrder.Where(iio => iio.RestrauntItem.Id == orderingItem.RestrauntItem.Id).Single();
+                    specifiedItem.Quantity += orderingItem.Quantity;
+                    specifiedItem.PriceXQty += orderingItem.PriceXQty;
+                }
+            }
+        }
+
+        foreach (var orderingItem in tempOrderState.ItemsInOrder)
+        {
+            if (orderingItem.Quantity > 10)
+            {
+                orderingItem.Quantity = 10;
+            }
+        }
+
+        for (int i = 0; i < tempOrderState.ItemsInOrder.Count; i++)
+        {
+            orderTotal += tempOrderState.ItemsInOrder[i].PriceXQty;
+        }
+
+        oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
+        return tempOrderState;
+    }
+    private void SelectedOrderMethodUser()
+    {
+        if (selectedOrderMethod == "Delivery")
+        {
+            userAddress = selectedOrderMethod;
+            isDelivered = true;
+        }
+        else
+        {
+
+            isDelivered =  false; 
+        }
+    }
+
+}
