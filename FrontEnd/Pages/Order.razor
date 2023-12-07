@@ -4,13 +4,12 @@
 @using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState orderState
 
 <!-- Start of Google Authorization -->
 <AuthorizeView>
     <Authorized>
         <div>
-            Wellcome! @context.User.Identity?.Name
+            Welcome! @context.User.Identity?.Name
         </div>
     </Authorized>
 </AuthorizeView>
@@ -123,47 +122,6 @@ else
         }
     }
 
-    private OrderState MergeItemsInList(OrderState oldOrderState)
-    {
-        List<int> containedItems = new();
-        OrderState tempOrderState = new();
-        oldOrderState.itemCounter = 0;
-
-        foreach (var orderingItem in oldOrderState.ItemsInOrder)
-        {
-            oldOrderState.itemCounter = oldOrderState.itemCounter + 1;
-            if (!containedItems.Contains(orderingItem.RestrauntItem.Id))
-            {
-                containedItems.Add(orderingItem.RestrauntItem.Id);
-                tempOrderState.ItemsInOrder.Add(orderingItem);
-            }
-            else
-            {
-                if (oldOrderState.itemCounter > oldOrderState.previousItemCount)
-                {
-                    var specifiedItem = tempOrderState.ItemsInOrder.Where(iio => iio.RestrauntItem.Id == orderingItem.RestrauntItem.Id).Single();
-                    specifiedItem.Quantity += orderingItem.Quantity;
-                    specifiedItem.PriceXQty += orderingItem.PriceXQty;
-                }
-            }
-        }
-
-        foreach (var orderingItem in tempOrderState.ItemsInOrder)
-        {
-            if (orderingItem.Quantity > 10)
-            {
-                orderingItem.Quantity = 10;
-            }
-        }
-
-        for (int i = 0; i < tempOrderState.ItemsInOrder.Count; i++)
-        {
-            orderTotal += tempOrderState.ItemsInOrder[i].PriceXQty;
-        }
-
-        oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
-        return tempOrderState;
-    }
     private void NavegateToCustomerPayment()
     {
         NavigationManager.NavigateTo($"/CustomerPayment");
