@@ -59,7 +59,18 @@ else
         var a = await AuthState;
 
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        customer = await dbContext.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        var custs = await dbContext.Customers.ToListAsync();
+        customer = new Customer() { Id = -1 };
+
+        if (userId is null)
+            if ((customer = Order.CheckForCustomer(custs)) is null)
+                dbContext.Customers.Add(customer = Order.CreateCustomer());
+            else
+                customer = custs.Where(opt => opt.UserId == userId).Single();
+
+        if (customer.Id == -1)
+            throw new Exception("Somehow the customer had a -1 id");
+
         if ((await dbContext.Purchases.Where(p => p.CustomerId == customer.Id).ToListAsync()).Count() > 0)
         {
             orderHistory = await dbContext.Purchases
