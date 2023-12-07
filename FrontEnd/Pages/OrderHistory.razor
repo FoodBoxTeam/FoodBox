@@ -40,6 +40,13 @@ else
 }
 
 @code {
+    public OrderHistory() { }
+
+    public OrderHistory(IDbContextFactory<FoodBoxDB> dbf)
+    {
+        dbcontextfactory = dbf;
+    }
+
     [CascadingParameter]
     public Task<AuthenticationState>? AuthState { get; set; }
     private Customer? customer { get; set; }
@@ -83,28 +90,33 @@ else
     {
         var custCart = await FindCustCartAsync(customer, restaurant);
         using var dbContext = dbcontextfactory.CreateDbContext();
-        //Clear the cart and cart items
-        custCart = new()
+        custCart.RestaurantId = restaurant.Id;
+        custCart.CustomerId = customer.Id;
+        dbContext.Entry(custCart).Property(p => p.RestaurantId).IsModified = true;
+        dbContext.Entry(custCart).Property(p => p.CustomerId).IsModified = true;
+
+        if (custCart.CartItems.Where(cc => cc.Item.Id == item.Id).Count() > 0)
+        {
+            custCart.CartItems.Where(cc => cc.Item.Id == item.Id).Single().Quantity += quantity;
+            if (custCart.CartItems.Where(cc => cc.Item.Id == item.Id).Single().Quantity > 10)
             {
-                Id = custCart.Id,
-                RestaurantId = restaurant.Id,
-                CustomerId = customer.Id
-            };
+                custCart.CartItems.Where(cc => cc.Item.Id == item.Id).Single().Quantity = 10;
+            }
+            dbContext.Entry(custCart.CartItems.Where(cc => cc.Item.Id == item.Id).Single()).Property(p => p.Quantity).IsModified = true;
+            await dbContext.SaveChangesAsync();
+        }
+        else
+        {
+            var newCartItem = new CartItem()
+                {
+                    CartId = custCart.Id,
+                    ItemId = item.Id,
+                    ActualPrice = price,
+                    Quantity = quantity
 
-        custCart.Restaurant = restaurant;
-        var newCartItem = new CartItem()
-
-            {
-                CartId = custCart.Id,
-                ItemId = item.Id,
-                ActualPrice = price,
-                Quantity = quantity
-
-            };
-
-        dbContext.CartItems.Add(newCartItem);
-
-
+                };
+            dbContext.CartItems.Add(newCartItem);
+        }
         await dbContext.SaveChangesAsync();
     }
   
@@ -117,7 +129,7 @@ else
     public async Task<Cart> FindCustCartAsync(Customer customer, Restaurant restaurant)
     {
         using var dbContext = dbcontextfactory.CreateDbContext();
-        var customersCart = await dbContext.Carts.FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
+        var customersCart = await dbContext.Carts.Include(ci => ci.CartItems).ThenInclude(ci => ci.Item).FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
 
         if (customersCart is null)
         {

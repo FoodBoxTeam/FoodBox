@@ -2,9 +2,9 @@
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
 @using FrontEnd.Pages
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState OrderState
 
 @if (menuItems is not null && restaurantsAndItems is not null)
 {
@@ -34,10 +34,10 @@
                                 </div>
                                 <div class="app-form-group buttons">
                                     <button type="submit" class="app-form-button"
-                                            disabled="@IsBusy" @onclick="HandleSubmit">
+                                            disabled="@IsBusy" onclick="@(() => HandleSubmit())">
                                         Submit
                                     </button>
-                                    <div style="color:grey;">Price: @(quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price)</div>
+                                    <div style="color:grey;">Price: @(quantityItem * @restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price)</div>
                                 </div>
                             </div>
                         </div>
@@ -53,6 +53,8 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthState { get; set; }
     [Parameter]
     public int SelectedItemId { get; set; }
     [Parameter]
@@ -69,6 +71,8 @@ else
     public int quantityItem { get; set; } = 1;
     private int[] quantity = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     OrderingItemDto selectedItemOrder { get; set; } = new();
+    private Cart cart { get; set; }
+    private Customer customer { get; set; }
 
     private async Task HandleValidSubmit()
     {
@@ -91,16 +95,13 @@ else
             await OnCancel.InvokeAsync();
         }
     }
-    private void HandleSubmit()
+    private async Task HandleSubmit()
     {
-        if (restaurantsAndItems is not null)
-        {
-            selectedItemOrder.RestrauntItem = restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single();
-            selectedItemOrder.Quantity = quantityItem;
-            selectedItemOrder.PriceXQty = quantityItem * restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price;
-            OrderState.ItemsInOrder.Add(selectedItemOrder);
-            NavigateToOrderPage();
-        } 
+        OrderHistory orderHistory = new(ContextFactory);
+        await orderHistory.AddItemToCustomersCartAsync(customer, restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Item,
+        restaurantsAndItems[RestaurantId - 1], restaurantsAndItems[RestaurantId - 1].RestaurantItems.Where(id => id.ItemId == SelectedItemId).Single().Price,
+        quantityItem);
+        NavigateToOrderPage();
     }
 
     protected override async Task OnInitializedAsync()
@@ -110,6 +111,15 @@ else
         restaurantsAndItems = await context.Restaurants
             .Include(ri => ri.RestaurantItems)
             .ToListAsync();
+
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        cart = await context.Carts
+            .Where(c => c.CustomerId == customer.Id)
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Item)
+            .SingleAsync();
     }
 
     private void NavigateToOrderPage()
