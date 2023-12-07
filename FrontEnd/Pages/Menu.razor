@@ -33,9 +33,19 @@
                                     <div class="order_prise">
                                         <span>@item.Price</span>
                                     </div>
+                                    <AuthorizeView>
+                                        @if(favsList.Where(fi => fi.ItemId == item.Item.Id).Count() > 0)
+                                        {
+                                            <button onclick="@(async Task () => await UnLikeItem(item.Item.Id))" class="order_love">♥</button>
+                                        }
+                                        else
+                                        {
+                                            <button onclick="@(async Task () => await LikeItem(item.Item.Id))" class="order_like">♥</button>
+                                        }
+                                    </AuthorizeView>
                                 </div>
                                 <div class="order_info">
-                                    <h3><a href="orderingitem/@item.Item.Id/">@item.Item.ItemName</a></h3>
+                                    <h3><a href="orderingitem/@item.Item.Id/@selectedRestaurant.Id">@item.Item.ItemName</a></h3>
                                     <p>
                                         @item.Item.Ingredients
                                         <div class="text-black">@item.Item.Description</div>
@@ -93,9 +103,11 @@ else
     private List<Restaurant> restaurants { get; set; }
     private string[] orderingBy = new string[] { "Salad", "Main Dish", "Soup", "Apple", "Shake","Dessert"};
     private string selectedFilter { get; set; } = "Takeout";
+    List<FavoriteItem> favsList { get; set; }
     Cart cart { get; set; }
+    Customer customer;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         using var context = ContextFactory.CreateDbContext();
         restaurants = await context.Restaurants
@@ -107,7 +119,6 @@ else
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var custs = await context.Customers.ToListAsync();
-        Customer customer;
         if (userId is null)
         {
             if ((customer = Order.CheckForCustomer(custs)) is null)
@@ -131,6 +142,29 @@ else
             selectedRestaurant = cart.Restaurant;
             selectedRestaurantId = cart.RestaurantId;
         }
+
+        favsList = await context.FavoriteItems.Where(fi => fi.CustomerId == customer.Id).ToListAsync();
+    }
+
+    private async Task LikeItem(int itemId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        var fi = new FavoriteItem()
+            {
+                ItemId = itemId,
+                CustomerId = customer.Id
+            };
+        context.FavoriteItems.Add(fi);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("menu");
+    }
+
+    private async Task UnLikeItem(int itemId)
+    {
+        using var context = ContextFactory.CreateDbContext();
+        await context.FavoriteItems.Where(fi => fi.ItemId == itemId).Where(fi => fi.CustomerId == customer.Id).ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/menu");
     }
 
     private async Task ChangeLocationAsync()

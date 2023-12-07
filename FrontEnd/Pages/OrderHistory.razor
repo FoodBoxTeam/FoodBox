@@ -84,6 +84,8 @@ else
                 .Include(p => p.PurchaseItems)
                 .ThenInclude(pi => pi.Item)
                 .ToListAsync();
+
+            orderHistory.OrderBy(o => o.PurchaseDate);
         }
     }
     public async Task UpdateCartAsync(int id)
