@@ -15,7 +15,7 @@
 </AuthorizeView>
 <!-- End Google Authorization -->
 <h3>Your Order: </h3>
-@if (cart is not null)
+@if (cart is not null && cart.CartItems.Count() > 0)
 {
     <table class="table table-striped">
         <thead>
@@ -43,6 +43,7 @@
         </tbody>
     </table>
     <h3>Order Total: @orderTotal</h3>
+    <h3>Order Total With Tax: @(Math.Round(orderTotal * 1.073m, 2))</h3>
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
         <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
@@ -85,7 +86,7 @@
                             <label for="cardNumber">
                                 Card Number:
                             </label>
-                            <input class="form-control" id="cardNumber" maxlength="19" placeholder="1234 5678 1234 5678" required="" type="text" />
+                            <input class="form-control" id="cardNumber" @bind-value="cardNumber" maxlength="19" placeholder="1234 5678 1234 5678" required="" type="text" />
                         </div>
                         <div class="form-group">
                             <label for="expiryDate">
@@ -100,7 +101,49 @@
                             <input class="form-control" id="cvv" maxlength="3" placeholder="123" required="" type="number" />
                         </div>
                         <button class="btn btn-primary w-100" type="submit"
-                                disabled="@IsBusy" @onclick="HandleSubmit">
+                                disabled="@IsBusy" onclick="@(async Task () => await HandleSubmit())">
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="container mt-5" id="customer-form">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h2>
+                        Enter Your Address and Payment Details
+                    </h2>
+                    <form id="customerForm">
+                        <div class="form-group">
+                            <label for="fullName">
+                                Full Name:
+                            </label>
+                            <input class="form-control" id="fullName" placeholder="John Doe" required="" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cardNumber">
+                                Card Number:
+                            </label>
+                            <input class="form-control" @bind-value="cardNumber" id="cardNumber" required="" maxlength="19" placeholder="1234 5678 1234 5678" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="expiryDate">
+                                Expiry Date:
+                            </label>
+                            <input class="form-control" id="expiryDate" required="" type="month" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">
+                                CVV:
+                            </label>
+                            <input class="form-control" id="cvv" maxlength="3" required="" placeholder="123" type="number" />
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit"
+                                disabled="@IsBusy" onclick="@(async Task () => await HandleSubmit())">
                             Submit
                         </button>
                     </form>
@@ -128,6 +171,7 @@ else
     private Cart cart { get; set; }
     private CartItem cartItem { get; set; }
     private Customer customer { get; set; }
+    string cardNumber { get; set; }
     private List<PurchaseItem> finalPurchaseItems = new();
 
     [CascadingParameter]
@@ -159,7 +203,11 @@ else
     }
     private async Task HandleSubmit()
     {
-        await ClearCardItem();
+        if(cardNumber is not null)
+        {
+            await FinishPurchase();
+            NavigationManager.NavigateTo("/Confirmation");
+        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -190,48 +238,18 @@ else
             .Include(c => c.CartItems)
             .ThenInclude(ci => ci.Item)
             .SingleAsync();
-    }
 
-    private OrderState MergeItemsInList(OrderState oldOrderState)
-    {
-        List<int> containedItems = new();
-        OrderState tempOrderState = new();
-        oldOrderState.itemCounter = 0;
-
-        foreach (var orderingItem in oldOrderState.ItemsInOrder)
+        @foreach (var cartItem in cart.CartItems)
         {
-            oldOrderState.itemCounter = oldOrderState.itemCounter + 1;
-            if (!containedItems.Contains(orderingItem.RestrauntItem.Id))
-            {
-                containedItems.Add(orderingItem.RestrauntItem.Id);
-                tempOrderState.ItemsInOrder.Add(orderingItem);
-            }
-            else
-            {
-                if (oldOrderState.itemCounter > oldOrderState.previousItemCount)
-                {
-                    var specifiedItem = tempOrderState.ItemsInOrder.Where(iio => iio.RestrauntItem.Id == orderingItem.RestrauntItem.Id).Single();
-                    specifiedItem.Quantity += orderingItem.Quantity;
-                    specifiedItem.PriceXQty += orderingItem.PriceXQty;
-                }
-            }
+            orderTotal += cartItem.ActualPrice * cartItem.Quantity;
         }
 
-        foreach (var orderingItem in tempOrderState.ItemsInOrder)
-        {
-            if (orderingItem.Quantity > 10)
-            {
-                orderingItem.Quantity = 10;
-            }
-        }
+        orderTotal = Math.Round(orderTotal, 2);
 
-        for (int i = 0; i < tempOrderState.ItemsInOrder.Count; i++)
+        if(cart.CartItems.Count() < 1)
         {
-            orderTotal += tempOrderState.ItemsInOrder[i].PriceXQty;
+            NavigationManager.NavigateTo("/Confirmation");
         }
-
-        oldOrderState.previousItemCount = oldOrderState.ItemsInOrder.Count;
-        return tempOrderState;
     }
 
     private void SelectedOrderMethodUser()
@@ -251,41 +269,65 @@ else
     private async Task<Purchase> AddPurchase()
     {
         var dbcontext = ContextFactory.CreateDbContext();
-        ICollection<PurchaseItem> purchaseItems1 = cart.CartItems.Cast<PurchaseItem>().ToList();
-
         var purchase = new Purchase()
             {
                 PurchaseDate = DateOnly.FromDateTime(DateTime.Now),
                 CustomerId = customer.Id,
                 RestaurantId = cart.RestaurantId
             };
-        foreach (var purchaseItem in purchaseItems1)
+
+        dbcontext.Purchases.Add(purchase);
+        await dbcontext.SaveChangesAsync();
+
+        purchase = (await dbcontext.Purchases.Where(p => p.CustomerId == customer.Id)
+            .ToListAsync()).MaxBy(p => p.PurchaseDate);
+
+        List<PurchaseItem> purchaseItems = ParseCartItemsIntoPurchaseItems(cart.CartItems, purchase.Id);
+
+        var transaction = new PurchaseTransaction()
         {
-            finalPurchaseItems.Add(new PurchaseItem()
-                {
-                    Id = cart.Id,
-                    PurchaseId = purchase.Id,
-                    ItemId = purchaseItem.ItemId,
-                    Quantity = purchaseItem.Quantity,
-                    ActualPrice = purchaseItem.ActualPrice
+            PurchaseId = purchase.Id,
+            CreditCardNumber = cardNumber,
+            AmountPaid = Math.Round(orderTotal * 1.073m, 2)
+        };
 
-                });
-        }
-
-        await dbcontext.PurchaseItems.AddRangeAsync(finalPurchaseItems);
+        dbcontext.PurchaseTransactions.Add(transaction);
+        dbcontext.PurchaseItems.AddRange(purchaseItems);
         await dbcontext.SaveChangesAsync();
 
         return purchase;
     }
-    public async Task<CartItem> ClearCardItem()
+
+    public async Task FinishPurchase()
     {
         await AddPurchase();
-        await DeleteCard();
-        return cartItem;
+        await DeleteCartItems();
     }
-    public async Task DeleteCard()
+
+    private List<PurchaseItem> ParseCartItemsIntoPurchaseItems(IEnumerable<CartItem> ciList, int purchaseId)
+    {
+        List<PurchaseItem> piList = new();
+
+        foreach(var ci in ciList)
+        {
+            piList.Add(
+                new PurchaseItem()
+                {
+                    ItemId = ci.ItemId,
+                    Quantity = ci.Quantity,
+                    ActualPrice = ci.ActualPrice,
+                    PurchaseId = purchaseId
+                }
+            );
+        }
+
+        return piList;
+    }
+
+    public async Task DeleteCartItems()
     {
         using var dbContext = ContextFactory.CreateDbContext();
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
+        await dbContext.SaveChangesAsync();
     }
 }
