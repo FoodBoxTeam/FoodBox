@@ -1,9 +1,9 @@
 ﻿@page "/CustomerPayment"
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject OrderState orderState
 
 <!-- Start of Google Authorization -->
 <AuthorizeView>
@@ -15,7 +15,7 @@
 </AuthorizeView>
 <!-- End Google Authorization -->
 <h3>Your Order: </h3>
-@if (orderState.ItemsInOrder.Count > 0)
+@if (cart is not null)
 {
     <table class="table table-striped">
         <thead>
@@ -29,15 +29,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var restautantItem in orderState.ItemsInOrder)
+            @foreach (var cartItem in cart.CartItems)
             {
                 <tr>
-                    <td><img src="Images/@restautantItem.RestrauntItem.Item.Image" class="rounded-pill" alt="@restautantItem.RestrauntItem.Item.ItemName image" style="height:13em;"></td>
-                    <td>@restautantItem.RestrauntItem.Item.ItemName</td>
-                    <td>@restautantItem.Quantity</td>
-                    <td><a href="edititem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
-                    <td>@restautantItem.PriceXQty</td>
-                    <td><a href="removeitem/@restautantItem.RestrauntItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
+                    <td><img src="Images/@cartItem.Item.Image" class="rounded-pill" alt="@cartItem.Item.ItemName image" style="height:13em;"></td>
+                    <td>@cartItem.Item.ItemName</td>
+                    <td>@cartItem.Quantity</td>
+                    <td><a href="edititem/@cartItem.Id" class="boxed_btn" style="color:black;">Edit</a></td>
+                    <td>@(cartItem.ActualPrice * cartItem.Quantity)</td>
+                    <td><a href="/removeItem/@cartItem.Id" class="boxed_btn" style="color:black;">Remove</a></td>
                 </tr>
             }
         </tbody>
@@ -141,6 +141,10 @@ else
     private string userAddress { get; set; }
     private bool isDelivered { get; set; } = true;
     bool PopupVisible { get; set; }
+    private Cart cart { get; set; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthState { get; set; }
 
 
     //private int
@@ -171,10 +175,19 @@ else
 
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        orderState = MergeItemsInList(orderState);
+        var context = ContextFactory.CreateDbContext();
 
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+
+        cart = await context.Carts
+            .Where(c => c.CustomerId == customer.Id)
+            .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Item)
+            .SingleAsync();
     }
 
     private OrderState MergeItemsInList(OrderState oldOrderState)
