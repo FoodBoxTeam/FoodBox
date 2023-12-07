@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.3
--- Dumped by pg_dump version 15.4 (Debian 15.4-1.pgdg120+1)
+-- Dumped from database version 15.4
+-- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -31,6 +31,23 @@ ALTER SCHEMA public OWNER TO azure_pg_admin;
 
 COMMENT ON SCHEMA public IS 'standard public schema';
 
+
+--
+-- Name: insert_into_customertable(); Type: FUNCTION; Schema: public; Owner: bcml
+--
+
+CREATE FUNCTION public.insert_into_customertable() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    INSERT INTO customer (user_id, points)
+    VALUES (NEW."Id", 0);
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.insert_into_customertable() OWNER TO bcml;
 
 SET default_tablespace = '';
 
@@ -209,7 +226,7 @@ CREATE SEQUENCE public.cart_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.cart_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.cart_id_seq OWNER TO bcml;
 
 --
 -- Name: cart_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -246,7 +263,7 @@ CREATE SEQUENCE public.cart_item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.cart_item_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.cart_item_id_seq OWNER TO bcml;
 
 --
 -- Name: cart_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -291,7 +308,7 @@ CREATE SEQUENCE public.coupon_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.coupon_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.coupon_id_seq OWNER TO bcml;
 
 --
 -- Name: coupon_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -326,7 +343,7 @@ CREATE SEQUENCE public.customer_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.customer_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.customer_id_seq OWNER TO bcml;
 
 --
 -- Name: customer_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -361,7 +378,7 @@ CREATE SEQUENCE public.favorite_item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.favorite_item_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.favorite_item_id_seq OWNER TO bcml;
 
 --
 -- Name: favorite_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -379,7 +396,8 @@ CREATE TABLE public.item (
     item_name character varying(50) NOT NULL,
     description text,
     image character varying(60) DEFAULT 'default.png'::character varying NOT NULL,
-    ingredients character varying
+    ingredients character varying,
+    suggested_price money
 );
 
 
@@ -398,7 +416,7 @@ CREATE SEQUENCE public.item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.item_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.item_id_seq OWNER TO bcml;
 
 --
 -- Name: item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -436,7 +454,7 @@ CREATE SEQUENCE public.purchase_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.purchase_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.purchase_id_seq OWNER TO bcml;
 
 --
 -- Name: purchase_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -474,7 +492,7 @@ CREATE SEQUENCE public.purchase_item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.purchase_item_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.purchase_item_id_seq OWNER TO bcml;
 
 --
 -- Name: purchase_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -490,7 +508,6 @@ ALTER SEQUENCE public.purchase_item_id_seq OWNED BY public.purchase_item.id;
 CREATE TABLE public.purchase_transaction (
     id integer NOT NULL,
     purchase_id integer NOT NULL,
-    got_paid boolean DEFAULT false,
     credit_card_number character(16) NOT NULL,
     amount_paid money NOT NULL
 );
@@ -511,7 +528,7 @@ CREATE SEQUENCE public.purchase_transaction_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.purchase_transaction_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.purchase_transaction_id_seq OWNER TO bcml;
 
 --
 -- Name: purchase_transaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -549,7 +566,7 @@ CREATE SEQUENCE public.restaurant_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.restaurant_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.restaurant_id_seq OWNER TO bcml;
 
 --
 -- Name: restaurant_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -585,7 +602,7 @@ CREATE SEQUENCE public.restaurant_item_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.restaurant_item_id_seq OWNER TO bcml;
+ALTER SEQUENCE public.restaurant_item_id_seq OWNER TO bcml;
 
 --
 -- Name: restaurant_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: bcml
@@ -703,6 +720,8 @@ COPY public."AspNetUserClaims" ("Id", "UserId", "ClaimType", "ClaimValue") FROM 
 COPY public."AspNetUserLogins" ("LoginProvider", "ProviderKey", "ProviderDisplayName", "UserId") FROM stdin;
 Google	107241889370638546888	Google	55c5b990-8a70-4d5f-b080-f2baa9df5708
 Google	107875762567708427144	Google	b6592697-d3fe-4087-b4bb-806aef4daebe
+Google	106922388152389213857	Google	856784d5-c1e0-4298-8ca6-f22403598911
+Google	112564038833681118871	Google	1f5cd045-ecbd-4f5f-887d-db5ce10bbae9
 \.
 
 
@@ -731,16 +750,20 @@ COPY public."AspNetUsers" ("Id", "UserName", "NormalizedUserName", "Email", "Nor
 3f78f894-f061-4f63-87f2-5f357b907bdc	admin@snow.edu	ADMIN@SNOW.EDU	admin@snow.edu	ADMIN@SNOW.EDU	t	AQAAAAIAAYagAAAAEGItiHqN3ZkcQpPd0HlG7WkKpGY0QwWhFYIeR+8nNPwITD0x0iBNIryAEIpzySjzPg==	T2SANSBIWB5PFP2DYKAQBTNSB64AC47B	f4b9bd9f-2da5-4129-80dd-fd963fbcd363	\N	f	f	\N	t	0
 a30a1e39-1710-44ca-a420-c1af6dd7b2ba	employee1@snow.edu	EMPLOYEE1@SNOW.EDU	employee1@snow.edu	EMPLOYEE1@SNOW.EDU	t	AQAAAAIAAYagAAAAECD6SkYiQkiOYYNwMnIppn1/MOmzqALBZk7KYXQ06l7laFr92XxNfTpWJSWNWABwLg==	HUV64IFF2SYPGKOG4DBOVB56AWJNMEZ3	277a680b-c1cb-400c-abd0-754909ca6671	\N	f	f	\N	t	0
 c9c0229f-7086-4972-bf45-eb132c58c527	employee2@snow.edu	EMPLOYEE2@SNOW.EDU	employee2@snow.edu	EMPLOYEE2@SNOW.EDU	t	AQAAAAIAAYagAAAAEOXDqD0CsKT4ZUMB0lAo3pWZjk5ffkl9DSR48Ax8qBuyEzNmagDOCgqBHYQZkX9qjw==	VVXN2X2J55PYE7GZCXC6FRZ4PFNAFRMM	e5d07235-bdb1-4e1a-bc7b-430532533724	\N	f	f	\N	t	0
-891c7faa-27d6-4b0c-ace1-d8aa8a2b7360	LeselMeminger@gmail.com	LESELMEMINGER@GMAIL.COM	LeselMeminger@gmail.com	LESELMEMINGER@GMAIL.COM	f	AQAAAAIAAYagAAAAEBKluZow3obYXtSA/lNWbCFeyMIAtKkW9jdj+baQRhtQuLvUudbkdrhRk12f2oiKGA==	UB4ZH53YKNOZWIUJTCDBS5FXVITKRJBR	b8055ca6-35f9-40b0-9d33-07da08058ac1	\N	f	f	\N	t	0
-13fe59df-f954-4781-8862-f8375a6c67b0	RudySteiner@gmail.com	RUDYSTEINER@GMAIL.COM	RudySteiner@gmail.com	RUDYSTEINER@GMAIL.COM	f	AQAAAAIAAYagAAAAECqLXZLTXO8Qrt9DNcOuOeFIK8DXkyzfd41+QkxYoF2cqX8MGQaS5bfDhbt0Xg8Xow==	CQDKZ3HBHUKTDBXM6Q6UNR3RSITTW47A	69dac242-8513-4b81-82a6-e1460c75086c	\N	f	f	\N	t	0
 5972f1c6-6825-4a4a-9725-8850c78de275	RosaHubermann@gmail.com	ROSAHUBERMANN@GMAIL.COM	RosaHubermann@gmail.com	ROSAHUBERMANN@GMAIL.COM	t	AQAAAAIAAYagAAAAED+tKuC0MH/Oi2Mr10sn/br6ZK4OpFu5Cb83mbEbIYX3oz/ZKVXlPlmAV2ZgueyoHQ==	NCESHJDYYPCVCKFDNZUS633TQ3CWUIC3	674820e4-ba72-403b-aeac-d4be907240bf	\N	f	f	\N	t	0
-e9497c63-3f4b-457a-bec3-6ea7bc5b73a7	HansHubermann@gmail.com	HANSHUBERMANN@GMAIL.COM	HansHubermann@gmail.com	HANSHUBERMANN@GMAIL.COM	f	AQAAAAIAAYagAAAAEL/KpZ7pH265o3oP8fVrvyDgVQntOxl1/QHb4Nq1WgedYdbClDXtQStzjhZz/55Icw==	YM4O4GVFVYPMR22TCZX3E3MS4VKRT4V2	6df802f5-3526-470f-8987-2805e45b3c3c	\N	f	f	\N	t	0
-003c3ee1-5057-4c46-8394-e10c2430a050	MaxVandenburg@gmail.com	MAXVANDENBURG@GMAIL.COM	MaxVandenburg@gmail.com	MAXVANDENBURG@GMAIL.COM	f	AQAAAAIAAYagAAAAEJabFo4OdZQrwWKySXS/xjUC0l23mQ0l1Kvvy+wMqKq5n5sLjk/+qdICgNjKZJ1yuw==	BNHLENONB7TAWJEOU6AP4QJSVHHTJE2K	80815643-a5a8-47a5-a2ac-be38922399f8	\N	f	f	\N	t	0
 c6ab6962-da94-4b82-b0f1-be593ccd23dc	YourMom@gmail.com	YOURMOM@GMAIL.COM	YourMom@gmail.com	YOURMOM@GMAIL.COM	t	AQAAAAIAAYagAAAAEKoF7fvCWpzPMol+0ROMr4RoBJZOhtaIi5rwJgaa7qdLBSeHK8dwjsZvHdeWg+3aoQ==	6PUHRBP6LJMF74Q4ZSMNTJMFP44NORVS	cb9ab725-12ee-49cd-9cf6-afd031988a69	\N	f	f	\N	t	0
-b37975f8-4870-4ce3-b820-22afe861133b	YourDad@gmail.com	YOURDAD@GMAIL.COM	YourDad@gmail.com	YOURDAD@GMAIL.COM	f	AQAAAAIAAYagAAAAEGuAn8EWDxcUigu3C38DD/wr6sKVqdRQ3wqJ46ozDoGOYIyylT6snALZ+C2BNv1xYg==	HJW465ZWNVNHKGOLMLJ7KM42Z7QBAM46	adc51709-c6a9-4761-ba17-3ebbddfb8290	\N	f	f	\N	t	0
 63d6a0d0-8b9d-4da7-9949-603f2fcdc22a	Solis@gmail.com	SOLIS@GMAIL.COM	Solis@gmail.com	SOLIS@GMAIL.COM	t	AQAAAAIAAYagAAAAEKwRiTBrmtHf519tuBRkSVLR7aLL8N6YlQCpMnB5AB1pxTiyRAlSVrdasrlJK9BiIg==	5N2MF7UZIHP3OEVAFBNKJJKLPB74BQZG	ef66eab7-f1b2-418f-aa96-5e68c84c8906	\N	f	f	\N	t	0
 55c5b990-8a70-4d5f-b080-f2baa9df5708	cortlyndcox@gmail.com	CORTLYNDCOX@GMAIL.COM	cortlyndcox@gmail.com	CORTLYNDCOX@GMAIL.COM	t	\N	RKSM6FJQGGRCZYQ7KPHK4XJH62IHAUUN	2bbe87bb-1c62-4118-8dd5-daee45817f8c	\N	f	f	\N	t	0
 b6592697-d3fe-4087-b4bb-806aef4daebe	bensonbird2@gmail.com	BENSONBIRD2@GMAIL.COM	bensonbird2@gmail.com	BENSONBIRD2@GMAIL.COM	t	\N	BW5LYE5BIS4EDURE6RXZHDWDG4TKMI2L	5202667d-ce8e-4c52-8ee5-c1ea0f9d0434	\N	f	f	\N	t	0
+1f5cd045-ecbd-4f5f-887d-db5ce10bbae9	solisluris@gmail.com	SOLISLURIS@GMAIL.COM	solisluris@gmail.com	SOLISLURIS@GMAIL.COM	t	\N	ULYBI4FZ342TEN6OUKDGRB2SZ6DD6F7H	459b4516-d7dc-4798-b6d1-b088a3abc8f9	\N	f	f	\N	t	0
+856784d5-c1e0-4298-8ca6-f22403598911	jebran.mustafa@gmail.com	JEBRAN.MUSTAFA@GMAIL.COM	jebran.mustafa@gmail.com	JEBRAN.MUSTAFA@GMAIL.COM	t	\N	VJSOS2EJFRRQSEBMRORYVKSKVT236ORS	72bc12bc-9fb5-4258-b2e6-7678eebf9d0b	\N	f	f	\N	t	0
+891c7faa-27d6-4b0c-ace1-d8aa8a2b7360	LeselMeminger@gmail.com	LESELMEMINGER@GMAIL.COM	LeselMeminger@gmail.com	LESELMEMINGER@GMAIL.COM	t	AQAAAAIAAYagAAAAEBKluZow3obYXtSA/lNWbCFeyMIAtKkW9jdj+baQRhtQuLvUudbkdrhRk12f2oiKGA==	UB4ZH53YKNOZWIUJTCDBS5FXVITKRJBR	b8055ca6-35f9-40b0-9d33-07da08058ac1	\N	f	f	\N	t	0
+13fe59df-f954-4781-8862-f8375a6c67b0	RudySteiner@gmail.com	RUDYSTEINER@GMAIL.COM	RudySteiner@gmail.com	RUDYSTEINER@GMAIL.COM	t	AQAAAAIAAYagAAAAECqLXZLTXO8Qrt9DNcOuOeFIK8DXkyzfd41+QkxYoF2cqX8MGQaS5bfDhbt0Xg8Xow==	CQDKZ3HBHUKTDBXM6Q6UNR3RSITTW47A	69dac242-8513-4b81-82a6-e1460c75086c	\N	f	f	\N	t	0
+e9497c63-3f4b-457a-bec3-6ea7bc5b73a7	HansHubermann@gmail.com	HANSHUBERMANN@GMAIL.COM	HansHubermann@gmail.com	HANSHUBERMANN@GMAIL.COM	t	AQAAAAIAAYagAAAAEL/KpZ7pH265o3oP8fVrvyDgVQntOxl1/QHb4Nq1WgedYdbClDXtQStzjhZz/55Icw==	YM4O4GVFVYPMR22TCZX3E3MS4VKRT4V2	6df802f5-3526-470f-8987-2805e45b3c3c	\N	f	f	\N	t	0
+003c3ee1-5057-4c46-8394-e10c2430a050	MaxVandenburg@gmail.com	MAXVANDENBURG@GMAIL.COM	MaxVandenburg@gmail.com	MAXVANDENBURG@GMAIL.COM	t	AQAAAAIAAYagAAAAEJabFo4OdZQrwWKySXS/xjUC0l23mQ0l1Kvvy+wMqKq5n5sLjk/+qdICgNjKZJ1yuw==	BNHLENONB7TAWJEOU6AP4QJSVHHTJE2K	80815643-a5a8-47a5-a2ac-be38922399f8	\N	f	f	\N	t	0
+b37975f8-4870-4ce3-b820-22afe861133b	YourDad@gmail.com	YOURDAD@GMAIL.COM	YourDad@gmail.com	YOURDAD@GMAIL.COM	t	AQAAAAIAAYagAAAAEGuAn8EWDxcUigu3C38DD/wr6sKVqdRQ3wqJ46ozDoGOYIyylT6snALZ+C2BNv1xYg==	HJW465ZWNVNHKGOLMLJ7KM42Z7QBAM46	adc51709-c6a9-4761-ba17-3ebbddfb8290	\N	f	f	\N	t	0
+a96fc2b8-155c-4f36-b8af-26e53173ef3a	Solis0@gmail.com	SOLIS0@GMAIL.COM	Solis0@gmail.com	SOLIS0@GMAIL.COM	t	AQAAAAIAAYagAAAAEM44NfrFxGpJdiJdKQ6c3F0aBzf8336ON4aHtj9XXiKdrtmpxjkpzma3hxb9OklZOQ==	DZFLLD7ODMKMFGMXOYQSTM5BYL7UYVXO	50b46f3b-700f-4261-b492-f5986a20183d	\N	f	f	\N	t	0
+3271f6f1-035f-4566-87a9-2ac5da1f5463	S0mething@gmale	S0METHING@GMALE	S0mething@gmale	S0METHING@GMALE	t	AQAAAAIAAYagAAAAEAyGzbjX/Vi6VHQWMCcQp/JDXgXPz8ZlBKz/b+pxg7PAybttQqBnXWVjYxI1Kd4LEg==	TJCNRFTBRGRL7LYBAABPPSVQRAD25RTA	525a1935-4b9e-48d7-a2cf-b2717b5c85cd	\N	f	f	\N	t	0
 \.
 
 
@@ -758,6 +781,7 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 --
 
 COPY public.cart (id, customer_id, restaurant_id) FROM stdin;
+1	1	1
 \.
 
 
@@ -766,6 +790,8 @@ COPY public.cart (id, customer_id, restaurant_id) FROM stdin;
 --
 
 COPY public.cart_item (id, cart_id, item_id, actual_price, quantity) FROM stdin;
+9	1	10	$9.00	2
+10	1	12	$9.50	2
 \.
 
 
@@ -804,6 +830,13 @@ COPY public.customer (id, user_id, points) FROM stdin;
 8	003c3ee1-5057-4c46-8394-e10c2430a050	59
 9	c6ab6962-da94-4b82-b0f1-be593ccd23dc	28
 10	b37975f8-4870-4ce3-b820-22afe861133b	32
+28	1f5cd045-ecbd-4f5f-887d-db5ce10bbae9	0
+29	b6592697-d3fe-4087-b4bb-806aef4daebe	0
+30	55c5b990-8a70-4d5f-b080-f2baa9df5708	0
+31	63d6a0d0-8b9d-4da7-9949-603f2fcdc22a	0
+32	856784d5-c1e0-4298-8ca6-f22403598911	0
+33	a96fc2b8-155c-4f36-b8af-26e53173ef3a	0
+34	3271f6f1-035f-4566-87a9-2ac5da1f5463	0
 \.
 
 
@@ -829,19 +862,19 @@ COPY public.favorite_item (id, item_id, customer_id) FROM stdin;
 -- Data for Name: item; Type: TABLE DATA; Schema: public; Owner: bcml
 --
 
-COPY public.item (id, item_name, description, image, ingredients) FROM stdin;
-1	Chicken Salad	Hand tossed	chickensalad.png	Chicken | Veggies
-2	Salmon	Grilled	salmon.png	Salmon
-3	Fish and Chips	Hand made	fishandchips.png	Fish | French Fries
-4	Chili	Home made chili	chili.png	Beans | Cheese
-5	Red Delicious Apples	10 Red Delicious Apples	reddeliciousapple.png	Apples
-6	Protein shake	20 grams of protein	proteinshake.png	Protein | Milk
-7	Ceasar salad	Low fat dressing	ceasarsalad.png	Lettuce | Ceasar Dressing
-8	Not yo mommas Salad	Bacon, avacodo, lettuce and so much more	notyomommassalad.png	Bacon | Avacado | Lettuce
-9	Bana split	At least it has a banana in it	banasplit.png	Banana | Vanilla Ice Cream
-10	Fruit salad	Hand tossed, sweet but savorty	fruitsalad.png	Grapes | Strawberries
-11	Fruit bowl	Strawberries, Rasberries, and grapes	fruitbowl.png	Strawberries | Raspberries | Grapes
-12	Steak	However you want it	steak.png	Steak
+COPY public.item (id, item_name, description, image, ingredients, suggested_price) FROM stdin;
+5	Red Delicious Apples	10 Red Delicious Apples	reddeliciousapple.png	Apples	\N
+1	Chicken Salad	Diced Grapes, Chicken & Celery with Sliced Almonds	chickensalad.png	Chicken | Grapes | Green Onions | Mayonnaise | Sliced Almonds | Celery | Dijon Mustard | Mayonnaise	\N
+2	Salmon	Grilled with our personal butter	salmon.png	Salmon	\N
+4	Chili	Our Secret Home Made Chili Recipe	chili.png	Beans | Cheese | Love	\N
+9	Banana Split	A sweet dessert with a crunch	banasplit.png	Banana | Vanilla Ice Cream | Fudge | Cherries | Walnut	\N
+12	Steak	However you want it with a side of A1	steak.png	Steak | A1	\N
+3	Fish & Chips	Hand hade fried chips with fried cod	fishandchips.png	Cod | Potatoes	\N
+6	Protein Shake	Freshly made with whole milk	proteinshake.png	Protein | Milk | Peanut Butter	\N
+7	Ceasar Salad	Low fat dressing, Shredded Parmeson Cheese, hand tossed	ceasarsalad.png	Lettuce | Ceasar Dressing | Parmesan Cheese | Croutons	\N
+8	Not Yo Momma's Salad	Made with love and her secret dressing	notyomommassalad.png	Bacon | Avacado | Lettuce | Olives | Secret Dressing	\N
+10	Fruit Salad	Hand tossed, sweet but savorty	fruitsalad.png	Grapes | Strawberries | Kiwi | Strawberries | Blueberries | Cantilope	\N
+11	Fruit Bowl	Perfect for on the go picnic or gym 	fruitbowl.png	Apples | Plums | Pears | Oranges	\N
 \.
 
 
@@ -850,50 +883,50 @@ COPY public.item (id, item_name, description, image, ingredients) FROM stdin;
 --
 
 COPY public.purchase (id, tax_rate, coupon_id, customer_id, purchase_date, restaurant_id) FROM stdin;
-1	0.073	\N	8	2022-10-05	\N
-2	0.073	\N	7	2023-03-17	\N
-3	0.073	\N	6	2022-10-19	\N
-4	0.073	\N	3	2022-06-23	\N
-5	0.073	\N	4	2022-03-22	\N
-6	0.073	\N	10	2022-04-22	\N
-7	0.073	\N	1	2022-06-20	\N
-8	0.073	\N	7	2022-04-21	\N
-9	0.073	\N	5	2023-03-04	\N
-10	0.073	\N	4	2022-08-11	\N
-11	0.073	\N	1	2022-05-07	\N
-12	0.073	\N	8	2023-06-21	\N
-13	0.073	\N	2	2023-08-22	\N
-14	0.073	\N	2	2023-12-14	\N
-15	0.073	\N	3	2023-03-15	\N
-16	0.073	\N	5	2022-08-27	\N
-17	0.073	\N	10	2022-06-13	\N
-18	0.073	\N	5	2022-05-23	\N
-19	0.073	\N	2	2023-11-11	\N
-20	0.073	\N	3	2023-05-04	\N
-21	0.073	\N	7	2022-11-06	\N
-22	0.073	\N	5	2023-12-06	\N
-23	0.073	\N	7	2023-12-24	\N
-24	0.073	\N	3	2023-10-12	\N
-25	0.073	\N	5	2023-05-09	\N
-26	0.073	\N	1	2022-09-02	\N
-27	0.073	\N	10	2022-02-03	\N
-28	0.073	\N	1	2023-08-22	\N
-29	0.073	\N	10	2022-08-18	\N
-30	0.073	\N	6	2022-03-17	\N
-31	0.073	\N	8	2023-08-08	\N
-32	0.073	\N	8	2022-03-26	\N
-33	0.073	\N	2	2023-06-04	\N
-34	0.073	\N	7	2023-02-03	\N
-35	0.073	\N	2	2022-06-23	\N
-36	0.073	\N	2	2022-08-27	\N
-37	0.073	\N	10	2023-10-06	\N
-38	0.073	\N	10	2023-12-27	\N
-39	0.073	\N	10	2022-02-26	\N
-40	0.073	\N	9	2022-11-04	\N
-41	0.073	\N	4	2023-03-07	\N
-42	0.073	\N	1	2022-09-24	\N
-43	0.073	\N	7	2023-08-06	\N
-44	0.073	\N	10	2023-11-14	\N
+1	0.073	\N	8	2022-10-05	1
+2	0.073	\N	7	2023-03-17	1
+3	0.073	\N	6	2022-10-19	1
+4	0.073	\N	3	2022-06-23	1
+5	0.073	\N	4	2022-03-22	1
+6	0.073	\N	10	2022-04-22	1
+7	0.073	\N	1	2022-06-20	1
+8	0.073	\N	7	2022-04-21	1
+9	0.073	\N	5	2023-03-04	1
+10	0.073	\N	4	2022-08-11	1
+11	0.073	\N	1	2022-05-07	1
+12	0.073	\N	8	2023-06-21	1
+13	0.073	\N	2	2023-08-22	1
+14	0.073	\N	2	2023-12-14	1
+15	0.073	\N	3	2023-03-15	1
+16	0.073	\N	5	2022-08-27	1
+17	0.073	\N	10	2022-06-13	1
+18	0.073	\N	5	2022-05-23	1
+19	0.073	\N	2	2023-11-11	1
+20	0.073	\N	3	2023-05-04	1
+21	0.073	\N	7	2022-11-06	1
+22	0.073	\N	5	2023-12-06	1
+23	0.073	\N	7	2023-12-24	1
+24	0.073	\N	3	2023-10-12	1
+25	0.073	\N	5	2023-05-09	1
+26	0.073	\N	1	2022-09-02	1
+27	0.073	\N	10	2022-02-03	1
+28	0.073	\N	1	2023-08-22	1
+29	0.073	\N	10	2022-08-18	1
+30	0.073	\N	6	2022-03-17	1
+31	0.073	\N	8	2023-08-08	1
+32	0.073	\N	8	2022-03-26	1
+33	0.073	\N	2	2023-06-04	1
+34	0.073	\N	7	2023-02-03	1
+35	0.073	\N	2	2022-06-23	1
+36	0.073	\N	2	2022-08-27	1
+37	0.073	\N	10	2023-10-06	1
+38	0.073	\N	10	2023-12-27	1
+39	0.073	\N	10	2022-02-26	1
+40	0.073	\N	9	2022-11-04	1
+41	0.073	\N	4	2023-03-07	1
+42	0.073	\N	1	2022-09-24	1
+43	0.073	\N	7	2023-08-06	1
+44	0.073	\N	10	2023-11-14	1
 \.
 
 
@@ -1008,51 +1041,51 @@ COPY public.purchase_item (id, purchase_id, item_id, quantity, actualprice) FROM
 -- Data for Name: purchase_transaction; Type: TABLE DATA; Schema: public; Owner: bcml
 --
 
-COPY public.purchase_transaction (id, purchase_id, got_paid, credit_card_number, amount_paid) FROM stdin;
-1	44	t	7849141525      	$227.13
-2	1	t	2658659887      	$60.58
-3	2	t	7246530588      	$195.14
-4	3	t	7418230102      	$86.36
-5	4	t	8807980277      	$55.75
-6	5	t	6361393019      	$382.14
-7	6	t	4585047232      	$273.62
-8	7	t	9832518289      	$39.70
-9	8	t	4452335933      	$23.06
-10	9	t	5297255195      	$145.93
-11	10	t	8168098829      	$82.08
-12	11	t	8715779192      	$25.02
-13	12	t	6599721677      	$501.78
-14	13	t	9094418427      	$341.42
-15	14	t	6761675007      	$18.77
-16	15	t	5198819617      	$41.58
-17	16	t	5757663031      	$190.32
-18	17	t	5472114364      	$135.71
-19	18	t	8204236547      	$23.39
-20	19	t	4349297460      	$387.62
-21	20	t	1023071174      	$505.11
-22	21	t	4194485943      	$79.36
-23	22	t	1010022468      	$19.79
-24	23	t	4904613421      	$145.93
-25	24	t	7211370689      	$99.76
-26	25	t	5504278325      	$17.09
-27	26	t	3518241747      	$216.32
-28	27	t	4513672807      	$173.34
-29	28	t	2702658887      	$19.79
-30	29	t	7282535026      	$39.16
-31	30	t	1537604059      	$171.05
-32	31	t	7158051852      	$107.16
-33	32	t	4470597036      	$44.34
-34	33	t	9675316319      	$254.73
-35	34	t	6194228868      	$423.30
-36	35	t	6900533960      	$55.80
-37	36	t	9480237686      	$20.20
-38	37	t	6247428148      	$223.01
-39	38	t	6538909055      	$82.08
-40	39	t	2020353028      	$12.02
-41	40	t	6666527094      	$328.34
-42	41	t	9447812580      	$214.54
-43	42	t	1626300679      	$22.17
-44	43	t	6013384920      	$46.59
+COPY public.purchase_transaction (id, purchase_id, credit_card_number, amount_paid) FROM stdin;
+1	44	7849141525      	$227.13
+2	1	2658659887      	$60.58
+3	2	7246530588      	$195.14
+4	3	7418230102      	$86.36
+5	4	8807980277      	$55.75
+6	5	6361393019      	$382.14
+7	6	4585047232      	$273.62
+8	7	9832518289      	$39.70
+9	8	4452335933      	$23.06
+10	9	5297255195      	$145.93
+11	10	8168098829      	$82.08
+12	11	8715779192      	$25.02
+13	12	6599721677      	$501.78
+14	13	9094418427      	$341.42
+15	14	6761675007      	$18.77
+16	15	5198819617      	$41.58
+17	16	5757663031      	$190.32
+18	17	5472114364      	$135.71
+19	18	8204236547      	$23.39
+20	19	4349297460      	$387.62
+21	20	1023071174      	$505.11
+22	21	4194485943      	$79.36
+23	22	1010022468      	$19.79
+24	23	4904613421      	$145.93
+25	24	7211370689      	$99.76
+26	25	5504278325      	$17.09
+27	26	3518241747      	$216.32
+28	27	4513672807      	$173.34
+29	28	2702658887      	$19.79
+30	29	7282535026      	$39.16
+31	30	1537604059      	$171.05
+32	31	7158051852      	$107.16
+33	32	4470597036      	$44.34
+34	33	9675316319      	$254.73
+35	34	6194228868      	$423.30
+36	35	6900533960      	$55.80
+37	36	9480237686      	$20.20
+38	37	6247428148      	$223.01
+39	38	6538909055      	$82.08
+40	39	2020353028      	$12.02
+41	40	6666527094      	$328.34
+42	41	9447812580      	$214.54
+43	42	1626300679      	$22.17
+44	43	6013384920      	$46.59
 \.
 
 
@@ -1129,14 +1162,14 @@ SELECT pg_catalog.setval('public."AspNetUserClaims_Id_seq"', 1, false);
 -- Name: cart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bcml
 --
 
-SELECT pg_catalog.setval('public.cart_id_seq', 1, false);
+SELECT pg_catalog.setval('public.cart_id_seq', 1, true);
 
 
 --
 -- Name: cart_item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bcml
 --
 
-SELECT pg_catalog.setval('public.cart_item_id_seq', 1, false);
+SELECT pg_catalog.setval('public.cart_item_id_seq', 10, true);
 
 
 --
@@ -1150,7 +1183,7 @@ SELECT pg_catalog.setval('public.coupon_id_seq', 12, true);
 -- Name: customer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: bcml
 --
 
-SELECT pg_catalog.setval('public.customer_id_seq', 10, true);
+SELECT pg_catalog.setval('public.customer_id_seq', 34, true);
 
 
 --
@@ -1401,6 +1434,13 @@ CREATE UNIQUE INDEX "RoleNameIndex" ON public."AspNetRoles" USING btree ("Normal
 --
 
 CREATE UNIQUE INDEX "UserNameIndex" ON public."AspNetUsers" USING btree ("NormalizedUserName");
+
+
+--
+-- Name: AspNetUsers create_customer_from_user; Type: TRIGGER; Schema: public; Owner: bcml
+--
+
+CREATE TRIGGER create_customer_from_user AFTER INSERT ON public."AspNetUsers" FOR EACH ROW EXECUTE FUNCTION public.insert_into_customertable();
 
 
 --
