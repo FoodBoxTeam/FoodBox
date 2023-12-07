@@ -2,6 +2,7 @@
 @using FrontEnd.Data;
 @using FrontEnd.Pages.Dto;
 @using System.Security.Claims;
+@using System.Net;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
 
@@ -108,7 +109,17 @@ else
 
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var customer = await context.Customers.Where(opt => opt.UserId == userId).SingleAsync();
+        var custs = await context.Customers.ToListAsync();
+        Customer customer = new Customer() { Id = -1 };
+
+        if(userId is null)
+            if ((customer = CheckForCustomer(custs)) is null)
+                context.Customers.Add(customer = Order.CreateCustomer());
+            else
+                customer = custs.Where(opt => opt.UserId == userId).Single();
+
+        if (customer.Id == -1)
+            throw new Exception("Somehow the customer had a -1 id");
 
         cart = await context.Carts
             .Where(c => c.CustomerId == customer.Id)
@@ -120,6 +131,32 @@ else
         {
             orderTotal = orderTotal + (cartItem.ActualPrice * cartItem.Quantity);
         }
+    }
+
+    public static Customer CreateCustomer()
+    {
+        string hostName = Dns.GetHostName();
+        string Ip = Dns.GetHostByName(hostName).AddressList[0].ToString();
+
+        Customer c = new()
+            {
+                UserId = Ip,
+                Points = 0
+            };
+
+        return c;
+    }
+
+    public static Customer CheckForCustomer(List<Customer> customers)
+    {
+        string hostName = Dns.GetHostName();
+        string Ip = Dns.GetHostByName(hostName).AddressList[0].ToString();
+        var custs = customers.Where(c => c.UserId == Ip);
+
+        if (custs.Count() > 0)
+            return custs.First();
+
+        return null;
     }
 
     private void NavegateToCustomerPayment()
