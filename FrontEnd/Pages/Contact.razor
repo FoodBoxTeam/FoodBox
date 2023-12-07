@@ -1,10 +1,14 @@
-﻿@page "/contact"
+﻿@page "/contact/{recieved:int?}"
+@inject NavigationManager NavigationManager
 
 <PageTitle>Contact</PageTitle>
 
 @*<h3>Please Contact Us!</h3>*@
 
-<!--Where should we put own own phone number? Email?-->
+@if(message is not null)
+{
+    <h3>@message</h3>
+}
 
 <EditForm Model="contact">
     <DataAnnotationsValidator/> 
@@ -53,7 +57,7 @@
                                 <input Class="app-form-control" placeholder="MESSAGE" id="message" type="text" />
                             </div>
                             <div class="app-form-group buttons">
-                                <button class="app-form-button">Submit</button>
+                                <button class="app-form-button" @onclick="HandleSubmit">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -65,10 +69,27 @@
 </EditForm>
 
 @code {
+    [Parameter]
+    public int? recieved { get; set; }
+
+    private string message { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (recieved == 1)
+        {
+            message = "Thank you! We recieved your message and are grateful that you contacted us!";
+        }
+    }
+
     private string[] reasons = new string[] {"The Food I recieved was not my order", "Employee treated me poorly",
         "I found ... in my food", "Unhappy with delivery", "Food made me sick", "Unhappy with waiting times",
         "I really enjoyed ...", "Can you start making ...", "Other" };
 
     CustomerContact contact { get; set; } = new();
 
+    private void HandleSubmit()
+    {
+        NavigationManager.NavigateTo("/contact/1");
+    }
 }

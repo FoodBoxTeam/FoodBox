@@ -1,21 +1,24 @@
 ﻿@page "/menu"
 @using FrontEnd.Data;
+@using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
-@inject OrderState OrderState
+@inject NavigationManager NavigationManager
 
 <PageTitle>Menu</PageTitle>
 
-@if (restaurants is not null && menuItems is not null)
+@if (restaurants is not null)
 {
-    if (selectedRestaurant is not null && OrderState.Restaurant is not null)
+    if (selectedRestaurantId != -1 && selectedRestaurant is not null)
     {
+        <button class="btn-outline-warning" onclick="@(() => ChangeLocationAsync())">Change Location</button>
+        <p class="text-warning">Changing Location will empty your cart</p>
         <!-- order_area_start -->
         <div class="order_area">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-12">
                         <div class="section_title mb-70">
-                            <h3>Menu for: @OrderState.Restaurant.RestaurantName</h3>
+                            <h3>Menu for: @selectedRestaurant.RestaurantName</h3>
                             <p></p>
                         </div>
                     </div>
@@ -62,7 +65,7 @@
                             }
                         </InputSelect>
                     <div class="container" style="padding-top: 5em">
-                        <button class="btn" @onclick="SelectedLocation">Submit Location</button>
+                        <button class="btn" onclick="@(() => SelectedLocationAsync())">Submit Location</button>
                     </div>
                     <div class="container" style="padding-top: 2em">
                         <p class="alert alert-danger">Please select your location</p>
@@ -81,41 +84,77 @@ else
 @code {
     [Parameter]
     public int Id { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthState { get; set; }
     private string ItemName { get; set; } = null!;
     private string? Description { get; set; }
     private Restaurant? selectedRestaurant { get; set; }
     private int selectedRestaurantId { get; set; } = -1;
-    private List<Item> menuItems { get; set; }
     private List<Restaurant> restaurants { get; set; }
     private string[] orderingBy = new string[] { "Salad", "Main Dish", "Soup", "Apple", "Shake","Dessert"};
     private string selectedFilter { get; set; } = "Takeout";
+    Cart cart { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         using var context = ContextFactory.CreateDbContext();
-        menuItems = await context.Items.ToListAsync();
         restaurants = await context.Restaurants
             .Include(ri => ri.RestaurantItems)
             .OrderBy(ri => ri.Id)
             .ToListAsync();
-        await refreshAsync();
 
-        if(OrderState.Restaurant is not null)
+        var a = await AuthState;
+        var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var custs = await context.Customers.ToListAsync();
+        Customer customer;
+        if (userId is null)
         {
-            selectedRestaurant = OrderState.Restaurant;
+            if ((customer = Order.CheckForCustomer(custs)) is null)
+            {
+                var userAndCustomer = Order.CreateCustomer();
+                context.Customers.Add(customer = userAndCustomer.Item2);
+                context.Users.Add(userAndCustomer.Item1);
+                await context.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            customer = custs.Where(opt => opt.UserId == userId).Single();
+        }
+
+        var oh = new OrderHistory(ContextFactory);
+        cart = await oh.FindCustCartAsync(customer);
+
+        if(cart.Restaurant is not null && cart.CartItems.Count() > 0)
+        {
+            selectedRestaurant = cart.Restaurant;
+            selectedRestaurantId = cart.RestaurantId;
         }
     }
-    async Task refreshAsync()
+
+    private async Task ChangeLocationAsync()
     {
-        StateHasChanged();
-        await Task.CompletedTask;
+        var oh = new OrderHistory(ContextFactory);
+        await oh.DeleteCustCartItems(cart);
+        selectedRestaurantId = -1;
     }
 
-    public void SelectedLocation()
+    public async Task SelectedLocationAsync()
     {
-        if(selectedRestaurantId != -1)
+        if (selectedRestaurantId != -1)
         {
-            selectedRestaurant = restaurants.Where(r => r.Id == selectedRestaurantId).Single();
-            OrderState.Restaurant = selectedRestaurant;
+            using var context = ContextFactory.CreateDbContext();
+            Cart c = await context.Carts.Where(c => c.Id == cart.Id).SingleAsync();
+            selectedRestaurant = await context.Restaurants
+                .Include(r => r.RestaurantItems)
+                .ThenInclude(ri => ri.Item)
+                .Where(r => r.Id == selectedRestaurantId)
+                .SingleAsync();
+            c.RestaurantId = selectedRestaurantId;
+            context.Entry(c).Property(c => c.RestaurantId).IsModified = true;
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/menu");
         }
     }
 }

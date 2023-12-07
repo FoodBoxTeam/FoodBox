@@ -29,8 +29,8 @@
                             <div class="order_info">
                                 <h3><a href="orderingitem/@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == i).Single().Item.Id/">@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == i).Single().Item.ItemName</a></h3>
                                 <p>
-                                    @*IngredientsGoHere*@ <br>
-                                    @restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Description <br>
+                                    @restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Ingredients
+                                    <div class="text-black">@restaurants[selectedRestaurant - 1].RestaurantItems.Where(id => id.ItemId == 1).Single().Item.Description</div>
                                 </p>
                                 <a href="menu" class="boxed_btn">Order Now!</a>
                             </div>

@@ -135,21 +135,43 @@ else
         }
         await dbContext.SaveChangesAsync();
     }
-  
+
     public async Task DeleteCustCartItems(Cart cart)
     {
         using var dbContext = dbcontextfactory.CreateDbContext();
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
     }
 
-    public async Task<Cart> FindCustCartAsync(Customer customer, Restaurant restaurant)
+    public async Task<Cart> FindCustCartAsync(Customer customer, Restaurant restaurant = null)
     {
         using var dbContext = dbcontextfactory.CreateDbContext();
-        var customersCart = await dbContext.Carts.Include(ci => ci.CartItems).ThenInclude(ci => ci.Item).FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
+        Cart customersCart;
+        try
+        {
+            customersCart = await dbContext.Carts
+                    .Include(c => c.Restaurant)
+                    .ThenInclude(r => r.RestaurantItems)
+                    .ThenInclude(ri => ri.Item)
+                    .Include(ci => ci.CartItems)
+                    .ThenInclude(ci => ci.Item)
+                    .FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
+
+        }
+        catch (NullReferenceException e)
+        {
+            customersCart = await dbContext.Carts
+                    .Include(c => c.Restaurant)
+                    .Include(ci => ci.CartItems)
+                    .ThenInclude(ci => ci.Item)
+                    .FirstOrDefaultAsync(c => c.CustomerId == customer.Id);
+        }
 
         if (customersCart is null)
         {
-            var newCart = new Cart() { CustomerId = customer.Id, RestaurantId = restaurant.Id };
+            var newCart = new Cart() { CustomerId = customer.Id };
+
+            if(restaurant is not null) 
+                newCart.RestaurantId = restaurant.Id;
 
             dbContext.Carts.Add(newCart);
 
