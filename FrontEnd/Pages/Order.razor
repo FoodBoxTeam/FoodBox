@@ -109,23 +109,26 @@ else
 
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         var custs = await context.Customers.ToListAsync();
-        Customer customer = new Customer() { Id = -1 };
+        Customer customer;
+        if (userId is null)
+        {
+            if ((customer = Order.CheckForCustomer(custs)) is null)
+            {
+                var userAndCustomer = Order.CreateCustomer();
+                context.Customers.Add(customer = userAndCustomer.Item2);
+                context.Users.Add(userAndCustomer.Item1);
+                await context.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            customer = custs.Where(opt => opt.UserId == userId).Single();
+        }
 
-        if(userId is null)
-            if ((customer = CheckForCustomer(custs)) is null)
-                context.Customers.Add(customer = Order.CreateCustomer());
-            else
-                customer = custs.Where(opt => opt.UserId == userId).Single();
-
-        if (customer.Id == -1)
-            throw new Exception("Somehow the customer had a -1 id");
-
-        cart = await context.Carts
-            .Where(c => c.CustomerId == customer.Id)
-            .Include(c => c.CartItems)
-            .ThenInclude(ci => ci.Item)
-            .SingleAsync();
+        var oh = new OrderHistory(ContextFactory);
+        cart = await oh.FindCustCartAsync(customer, (await context.Restaurants.FirstOrDefaultAsync()));
 
         @foreach (var cartItem in cart.CartItems)
         {
@@ -133,7 +136,7 @@ else
         }
     }
 
-    public static Customer CreateCustomer()
+    public static (IdentityUser, Customer) CreateCustomer()
     {
         string hostName = Dns.GetHostName();
         string Ip = Dns.GetHostByName(hostName).AddressList[0].ToString();
@@ -144,7 +147,17 @@ else
                 Points = 0
             };
 
-        return c;
+        IdentityUser iu = new()
+        {
+            Id = Ip,
+            EmailConfirmed = true,
+            TwoFactorEnabled = false,
+            PhoneNumberConfirmed = true,
+            LockoutEnabled = false,
+            AccessFailedCount = 0
+        };
+
+        return (iu, c);
     }
 
     public static Customer CheckForCustomer(List<Customer> customers)
