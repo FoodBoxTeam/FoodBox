@@ -66,7 +66,7 @@
             <div class="container">
                 <div class="screen">
                     <div class="container" style="padding-top:3em;">
-                        <label for="restaurant" class="label-large" style="color:green">Choose Restaurant Location</label>
+                        <label for="restaurant" class="col-form-label-lg" style="color:white">Choose Restaurant Location</label>
                         <InputSelect id="restaurant" class="form-select label-large"
                         @bind-Value="@selectedRestaurantId">
                             @foreach (var rt in restaurants)
@@ -156,7 +156,8 @@ else
             };
         context.FavoriteItems.Add(fi);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("menu");
+        favsList.Add(fi);
+        StateHasChanged();
     }
 
     private async Task UnLikeItem(int itemId)
@@ -164,7 +165,8 @@ else
         using var context = ContextFactory.CreateDbContext();
         await context.FavoriteItems.Where(fi => fi.ItemId == itemId).Where(fi => fi.CustomerId == customer.Id).ExecuteDeleteAsync();
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/menu");
+        favsList.RemoveAll(fi => fi.ItemId == itemId);
+        StateHasChanged();
     }
 
     private async Task ChangeLocationAsync()

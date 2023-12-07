@@ -170,10 +170,7 @@ else
 
         if (customersCart is null)
         {
-            var newCart = new Cart() { CustomerId = customer.Id };
-
-            if(restaurant is not null) 
-                newCart.RestaurantId = restaurant.Id;
+            var newCart = new Cart() { CustomerId = customer.Id, RestaurantId = 1 };
 
             dbContext.Carts.Add(newCart);
 
