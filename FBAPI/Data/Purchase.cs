@@ -15,9 +15,15 @@ public partial class Purchase
 
     public DateOnly PurchaseDate { get; set; }
 
+    public int? RestaurantId { get; set; }
+
     public virtual Coupon? Coupon { get; set; }
+
+    public virtual Customer? Customer { get; set; }
 
     public virtual ICollection<PurchaseItem> PurchaseItems { get; set; } = new List<PurchaseItem>();
 
     public virtual ICollection<PurchaseTransaction> PurchaseTransactions { get; set; } = new List<PurchaseTransaction>();
+
+    public virtual Restaurant? Restaurant { get; set; }
 }
