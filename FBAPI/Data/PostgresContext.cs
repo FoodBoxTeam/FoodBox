@@ -27,6 +27,10 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }
 
+    public virtual DbSet<Cart> Carts { get; set; }
+
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Coupon> Coupons { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
@@ -34,8 +38,6 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<FavoriteItem> FavoriteItems { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
-
-    public virtual DbSet<Location> Locations { get; set; }
 
     public virtual DbSet<Purchase> Purchases { get; set; }
 
@@ -119,6 +121,48 @@ public partial class PostgresContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.AspNetUserTokens).HasForeignKey(d => d.UserId);
         });
 
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("cart_pkey");
+
+            entity.ToTable("cart");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+            entity.Property(e => e.RestaurantId).HasColumnName("restaurant_id");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("cart_customer_id_fkey");
+
+            entity.HasOne(d => d.Restaurant).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.RestaurantId)
+                .HasConstraintName("cart_restaurant_id_fkey");
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("cart_item_pkey");
+
+            entity.ToTable("cart_item");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ActualPrice)
+                .HasColumnType("money")
+                .HasColumnName("actual_price");
+            entity.Property(e => e.CartId).HasColumnName("cart_id");
+            entity.Property(e => e.ItemId).HasColumnName("item_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+
+            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.CartId)
+                .HasConstraintName("cart_item_cart_id_fkey");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ItemId)
+                .HasConstraintName("cart_item_item_id_fkey");
+        });
+
         modelBuilder.Entity<Coupon>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("coupon_pkey");
@@ -183,28 +227,19 @@ public partial class PostgresContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Image)
+                .HasMaxLength(60)
+                .HasDefaultValueSql("'default.png'::character varying")
+                .HasColumnName("image");
+            entity.Property(e => e.Ingredients)
+                .HasColumnType("character varying")
+                .HasColumnName("ingredients");
             entity.Property(e => e.ItemName)
                 .HasMaxLength(50)
                 .HasColumnName("item_name");
-        });
-
-        modelBuilder.Entity<Location>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("location_pkey");
-
-            entity.ToTable("location");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Address).HasColumnName("address");
-            entity.Property(e => e.City)
-                .HasMaxLength(60)
-                .HasColumnName("city");
-            entity.Property(e => e.Country)
-                .HasMaxLength(60)
-                .HasColumnName("country");
-            entity.Property(e => e.State)
-                .HasMaxLength(60)
-                .HasColumnName("state");
+            entity.Property(e => e.SuggestedPrice)
+                .HasColumnType("money")
+                .HasColumnName("suggested_price");
         });
 
         modelBuilder.Entity<Purchase>(entity =>
@@ -217,6 +252,7 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.CouponId).HasColumnName("coupon_id");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
             entity.Property(e => e.PurchaseDate).HasColumnName("purchase_date");
+            entity.Property(e => e.RestaurantId).HasColumnName("restaurant_id");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(3, 3)
                 .HasDefaultValueSql("0.073")
@@ -225,6 +261,14 @@ public partial class PostgresContext : DbContext
             entity.HasOne(d => d.Coupon).WithMany(p => p.Purchases)
                 .HasForeignKey(d => d.CouponId)
                 .HasConstraintName("purchase_coupon_id_fkey");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("fkcustomer");
+
+            entity.HasOne(d => d.Restaurant).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.RestaurantId)
+                .HasConstraintName("fkrestaurant");
         });
 
         modelBuilder.Entity<PurchaseItem>(entity =>
@@ -266,9 +310,6 @@ public partial class PostgresContext : DbContext
                 .HasMaxLength(16)
                 .IsFixedLength()
                 .HasColumnName("credit_card_number");
-            entity.Property(e => e.GotPaid)
-                .HasDefaultValueSql("false")
-                .HasColumnName("got_paid");
             entity.Property(e => e.PurchaseId).HasColumnName("purchase_id");
 
             entity.HasOne(d => d.Purchase).WithMany(p => p.PurchaseTransactions)
@@ -284,15 +325,21 @@ public partial class PostgresContext : DbContext
             entity.ToTable("restaurant");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.LocationId).HasColumnName("location_id");
+            entity.Property(e => e.Address)
+                .HasMaxLength(60)
+                .HasColumnName("address");
+            entity.Property(e => e.City)
+                .HasMaxLength(60)
+                .HasColumnName("city");
+            entity.Property(e => e.Country)
+                .HasMaxLength(60)
+                .HasColumnName("country");
             entity.Property(e => e.RestaurantName)
                 .HasMaxLength(50)
                 .HasColumnName("restaurant_name");
-
-            entity.HasOne(d => d.Location).WithMany(p => p.Restaurants)
-                .HasForeignKey(d => d.LocationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("restaurant_location_id_fkey");
+            entity.Property(e => e.State)
+                .HasMaxLength(60)
+                .HasColumnName("state");
         });
 
         modelBuilder.Entity<RestaurantItem>(entity =>
@@ -318,8 +365,6 @@ public partial class PostgresContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("restaurant_item_restaurant_id_fkey");
         });
-        modelBuilder.HasSequence("jobid_seq", "cron");
-        modelBuilder.HasSequence("runid_seq", "cron");
 
         OnModelCreatingPartial(modelBuilder);
     }

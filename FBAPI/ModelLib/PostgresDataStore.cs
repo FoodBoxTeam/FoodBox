@@ -39,11 +39,11 @@ public class PostgresDataStore : IDataStore
 
     public async Task<IEnumerable<IDataObject>> GetUserRolesAsync(string id)
     {
-        var user = _context.AspNetUserLogins.Single(l => l.ProviderKey == id);
+        var user = await _context.AspNetUsers.Include(u => u.Roles).SingleAsync(l => l.Id == id);
 
         if (user != null)
         {
-            return await _context.AspNetRoles.ToListAsync() as IEnumerable<AspNetRole>;
+            return user.Roles as IEnumerable<AspNetRole>;
         }
         else
         {
@@ -51,4 +51,3 @@ public class PostgresDataStore : IDataStore
         }
     }
 }
-

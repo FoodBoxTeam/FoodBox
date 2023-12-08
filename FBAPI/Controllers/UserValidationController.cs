@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FBAPI.Controllers
 {
@@ -19,15 +20,27 @@ namespace FBAPI.Controllers
         //Post
 
         //Cache tax rates
-        [HttpGet()]
+        [HttpPost()]
         public async Task<IEnumerable<string>> GetUserRoles([FromBody] string token)
         {
-            IEnumerable<AspNetRole> roles = await _dataStore.GetUserRolesAsync(token) as IEnumerable<AspNetRole>;
+            IEnumerable<AspNetRole> roles;
+
+            try
+            {
+                roles = await _dataStore.GetUserRolesAsync(token) as IEnumerable<AspNetRole>;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new Exception("Not a valid token!!");
+            }
 
             List<string> strings = new List<string>();
 
             if (roles is null || roles.Count() == 0)
+            {
+                strings.Add("This user has no roles");
                 return strings;
+            }
 
             foreach (var role in roles)
                 strings.Add(role.Name);
