@@ -34,8 +34,8 @@
             }
         </tbody>
     </table>
-    <h3>Order Total: @orderTotal</h3>
-    <h3>Order Total With Tax: @(Math.Round(orderTotal * 1.073m, 2))</h3>
+    <h3>Order Total: @(orderTotal - couponTotal) </h3>
+    <h3>Order Total With Tax: @(Math.Round((orderTotal - couponTotal) * 1.073m, 2))</h3>
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
         <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
@@ -46,59 +46,11 @@
             }
         </InputSelect>
     </div>
-    @*
-    @if(payment is not null)
-    {
-        <EditForm Model="payment" id="customerForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div class="form-group">
-                <label for="fullName">
-                    Full Name:
-                </label>
-                <InputText class="form-control" id="fullName" placeholder="John Doe" @bind-value="payment.Name" />
-            </div>
-            <div class="form-group">
-                <label for="address">
-                    Address:
-                </label>
-                <InputText class="form-control" id="address" placeholder="Enter your address" @bind-value="payment.Address" />
-            </div>
-            <div class="form-group">
-                <label for="cardNumber">
-                    Card Number:
-                </label>
-                <InputText class="form-control" id="cardNumber" @bind-value="payment.CardNumber" maxlength="19" placeholder="1234 5678 1234 5678" required="" type="text" />
-            </div>
-            <div class="form-group">
-                <label for="expiryDate">
-                    Expiry Date:
-                </label>
-                <InputDate class="form-control" id="expiryDate" @bind-value="payment.ExpirationDate" TValue="DateOnly" />
-            </div>
-            <div class="form-group">
-                <label for="cvv">
-                    CVV:
-                </label>
-                <InputNumber class="form-control" id="cvv" maxlength="3" @bind-value="payment.Cvv" placeholder="123" TValue="int" />
-            </div>
-            <button class="btn btn-primary w-100" type="submit"
-                    @onselect="HandleSubmit"
-                    disabled="@IsBusy">
-                Submit
-            </button>
-        </EditForm>
-    } *@
 
     @* <-->This is for the addresses</--> *@
 
     @if (IsDilivery == "Delivery")
     {
-        <!-- Header Section -->
-        @* <header class="bg-dark text-white text-center p-4">
-            Customer Address and Payment
-        </header> *@
         <!-- Address and Payment Form -->
         <section class="container mt-5" id="customer-form">
             <div class="row justify-content-center">
@@ -119,6 +71,29 @@
                             </label>
                             <input class="form-control" id="address" @bind-value="address" placeholder="Enter your address" type="text" required=""></input>
                         </div>
+                        <div class="form-group">
+                            <label for="cvv">
+                                Coupon Code:
+                            </label>
+                            <input class="form-control" id="coupon" maxlength="10" @bind-value="coupon" placeholder="your code" required="" type="text" />
+                        </div>
+                        @if(coupon is not null)
+                        {
+                            @if(isValidCoupon == true )
+                            {
+                                <h1>That coupon is valid.</h1>
+                            }
+                            else
+                            {
+                                <h1>That coupon is invalid.</h1>
+                            }
+                        }
+
+                        <button class="btn btn-primary" type="submit"
+                                disabled="@IsBusy" @onclick="HandleCoupon">
+                            Check Coupon
+                        </button>
+
                         <div class="form-group">
                             <label for="cardNumber">
                                 Card Number:
@@ -161,6 +136,28 @@
                             </label>
                             <input class="form-control" id="fullName" @bind-value="name" placeholder="John Doe" required="" type="text" />
                         </div>
+                        <div class="form-group">
+                            <label for="cvv">
+                                Coupon Code:
+                            </label>
+                            <input class="form-control" id="coupon" maxlength="10" @bind-value="coupon" placeholder="your code" required="" type="text" />
+                        </div>
+                        @if (coupon is not null)
+                        {
+                            @if (isValidCoupon == true)
+                            {
+                                <h1>That coupon is valid.</h1>
+                            }
+                            else
+                            {
+                                <h1>That coupon is invalid.</h1>
+                            }
+                        }
+
+                        <button class="btn btn-primary" type="submit"
+                                disabled="@IsBusy" @onclick="HandleCoupon">
+                            Check Coupon
+                        </button>
                         <div class="form-group">
                             <label for="cardNumber">
                                 Card Number:
@@ -211,6 +208,11 @@ else
     string name { get; set; }
     string address { get; set; }
     int cvv { get; set; }
+    private string coupon { get; set; }
+    private IEnumerable<Coupon> coupons { get; set; }
+    private decimal couponTotal { get; set; } = 0;
+    private bool isValidCoupon { get; set; }
+
     DateOnly date { get; set; } = DateOnly.FromDateTime(DateTime.Now);
     private List<PurchaseItem> finalPurchaseItems = new();
 
@@ -264,6 +266,7 @@ else
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var custs = await context.Customers.ToListAsync();
+        coupons = await context.Coupons.ToListAsync();
 
         if (userId is null)
         {
@@ -301,15 +304,15 @@ else
     /*
     private void SelectedOrderMethodUser()
     {
-        if (IsDilivery)
-        {
-            isDelivered = true;
-        }
-        else
-        {
-            isDelivered =  false; 
-        }
+    if (IsDilivery)
+    {
+    isDelivered = true;
     }
+    else
+    {
+    isDelivered =  false; 
+     }
+     }
      */
 
     private async Task<Purchase> AddPurchase()
@@ -377,4 +380,34 @@ else
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
         await dbContext.SaveChangesAsync();
     }
+    private void HandleCoupon()
+    {
+        if (coupon is not null)
+        {
+            IsBusy = true;
+            var chosenCoupons = coupons.Where(c => c.Code == coupon).ToList();
+            if (chosenCoupons.Count() > 0)
+            {
+                if (DateOnly.FromDateTime(DateTime.Today) <= chosenCoupons[0].EndDate && DateOnly.FromDateTime(DateTime.Today) >= chosenCoupons[0].StartDate)
+                {
+                    isValidCoupon = true;
+                    couponTotal = chosenCoupons[0].Discount;
+
+                }
+                else
+                {
+                    isValidCoupon = false;
+                    couponTotal = 0;
+                }
+            }
+            else
+            {
+                isValidCoupon = false;
+                couponTotal = 0;
+            }
+
+            IsBusy = false;
+        }
+    }
+
 }
