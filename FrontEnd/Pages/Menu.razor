@@ -3,6 +3,8 @@
 @using System.Security.Claims;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
+@* @inject ILoggerFactory LoggerFactory *@
+@* @inject Logger<Menu> logger *@
 
 <PageTitle>Menu</PageTitle>
 
@@ -109,6 +111,9 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        //logger.LogInformation("Loading");
+        //var logger = LoggerFactory.CreateLogger<Menu>();
+        //logger.LogWarning("AHHHHH");
         using var context = ContextFactory.CreateDbContext();
         restaurants = await context.Restaurants
             .Include(ri => ri.RestaurantItems)
