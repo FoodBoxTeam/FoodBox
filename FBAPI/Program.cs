@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-Console.WriteLine("BENOSNF @@@@");
 var builder = WebApplication.CreateBuilder(args);
 
 // 401 un-authorized
