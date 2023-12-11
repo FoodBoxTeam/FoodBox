@@ -34,8 +34,8 @@
             }
         </tbody>
     </table>
-    <h3>Order Total: @(orderTotal - couponTotal) </h3>
-    <h3>Order Total With Tax: @(Math.Round((orderTotal - couponTotal) * 1.073m, 2))</h3>
+    <h3>Order Total: @((orderTotal - couponTotal) <= 0 ? 0 : (orderTotal - couponTotal)) </h3>
+    <h3>Order Total With Tax: @((orderTotal - couponTotal) <= 0 ? 0 : (Math.Round((orderTotal - couponTotal)) * 1.073m, 2))</h3>
     <div class="container">
         <label for="restaurant" class="label-large" style="padding-bottom:0.5em;">Select Order Method</label>
         <InputSelect id="restaurant" class="form-select label-large" style="padding-bottom:0.5em;"
@@ -113,7 +113,7 @@
                             <input class="form-control" id="cvv" maxlength="3" @bind-value="cvv" placeholder="123" required="" type="number" />
                         </div>
                         <button class="btn btn-primary w-100" type="submit"
-                                disabled="@IsBusy" onclick="@(async Task () => await HandleSubmit())">
+                                disabled="@IsBusy" @onclick="HandleSubmit">
                             Submit
                         </button>
                     </form>
@@ -177,7 +177,7 @@
                             <input class="form-control" id="cvv" maxlength="3" required="" placeholder="123" type="number" />
                         </div>
                         <button class="btn btn-primary w-100" type="submit"
-                                disabled="@IsBusy" onclick="@(async Task () => await HandleSubmit())">
+                                disabled="@IsBusy" @onclick="HandleSubmit">
                             Submit
                         </button>
                     </form>
@@ -325,6 +325,11 @@ else
                 RestaurantId = cart.RestaurantId
             };
 
+        if (couponTotal > 0)
+        {
+            purchase.CouponId = (coupons.Where(c => c.Code == coupon).ToList()[0]).Id;
+        }
+
         dbcontext.Purchases.Add(purchase);
         await dbcontext.SaveChangesAsync();
 
@@ -339,6 +344,18 @@ else
             CreditCardNumber = cardNumber,
             AmountPaid = Math.Round(orderTotal * 1.073m, 2)
         };
+
+        if(couponTotal > 0)
+        {
+            if (couponTotal >= orderTotal)
+            {
+                transaction.AmountPaid = 0;
+            }
+            else
+            {
+                transaction.AmountPaid = Math.Round((orderTotal - couponTotal) * 1.073m, 2);
+            }
+        }
 
         dbcontext.PurchaseTransactions.Add(transaction);
         dbcontext.PurchaseItems.AddRange(purchaseItems);
