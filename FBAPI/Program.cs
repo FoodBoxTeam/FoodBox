@@ -17,10 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IDataStore, PostgresDataStore>();
-builder.Services.AddDbContext<PostgresContext>(option =>
-{
-    option.UseNpgsql(builder.Configuration["ConnectionStrings"]);
-});
+builder.Services.AddDbContext<PostgresContext>(options => options.UseNpgsql(builder.Configuration["db"]));
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
