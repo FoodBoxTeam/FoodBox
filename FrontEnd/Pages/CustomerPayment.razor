@@ -5,6 +5,7 @@
 @using System.ComponentModel.DataAnnotations
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
+@inject ILogger<CustomerPayment> Logger
 
 <h3>Your Order: </h3>
 @if (cart is not null && cart.CartItems.Count() > 0)
@@ -344,6 +345,15 @@ else
         dbcontext.PurchaseItems.AddRange(purchaseItems);
         await dbcontext.SaveChangesAsync();
 
+        var a = await AuthState;
+        var userEmail = a.User.FindFirstValue(ClaimTypes.Email);
+
+        EmailSending.Email email = new EmailSending.Email();
+        email.SendEmail(userEmail);
+
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        ILogger logger = factory.CreateLogger<Program>();
+        logger.LogInformation("The card was deleted", "fun");
         return purchase;
     }
 
@@ -379,6 +389,7 @@ else
         using var dbContext = ContextFactory.CreateDbContext();
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
         await dbContext.SaveChangesAsync();
+        Logger.LogInformation("Cart deletion successful.");
     }
     private void HandleCoupon()
     {
