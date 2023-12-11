@@ -18,7 +18,11 @@ namespace FBAPI.Controllers
         }
 
         //Post
-
+        [HttpGet]
+        public string Get()
+        {
+            return "Hello World";
+        }
         //Cache tax rates
         [HttpPost()]
         public async Task<IEnumerable<string>> GetUserRoles([FromBody] string token)
