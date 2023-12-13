@@ -258,12 +258,18 @@ else
                 NavigationManager.NavigateTo("/Confirmation", forceLoad: true);
             }
         }
+        else
+        {
+            ILogger l = LoggerFactory.CreateLogger<Program>();
+            l.LogError("Already busy"); // Log Error
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         //payment = new();
-        var context = ContextFactory.CreateDbContext();
+        var context = ContextFactory.CreateDbContext(); ILogger logger = LoggerFactory.CreateLogger<Program>();
+        logger.LogDebug("Made it into the OnInitilixeation"); // debug
 
         var a = await AuthState;
         var userId = a.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -274,15 +280,26 @@ else
         {
             if ((customer = Order.CheckForCustomer(custs)) is null)
             {
+                logger.LogDebug("Made it so the customer is null, meaning that the IP address is not a user yet"); // debug
                 var userAndCustomer = Order.CreateCustomer();
                 context.Customers.Add(customer = userAndCustomer.Item2);
                 context.Users.Add(userAndCustomer.Item1);
                 await context.SaveChangesAsync();
             }
+            else
+            {
+                logger.LogDebug("The IP customer exists!"); // debug
+                logger.LogError("Customer already has an account, did not make one"); // Error
+            }
         }
         else
         {
             customer = custs.Where(opt => opt.UserId == userId).Single();
+            if(customer is null)
+            {
+                logger.LogDebug("We are in big truble, why was cutomer null now?"); // debug
+                logger.LogError("customer is null, should not have been"); // Error
+            }
         }
 
         cart = await context.Carts
@@ -301,6 +318,7 @@ else
         if(cart.CartItems.Count() < 1)
         {
             NavigationManager.NavigateTo("/Confirmation");
+            logger.LogDebug("Made it to Confirmation... Hopefully"); // debug
         }
     }
     /*
@@ -363,7 +381,7 @@ else
         dbcontext.PurchaseItems.AddRange(purchaseItems);
         await dbcontext.SaveChangesAsync();
 
-        try
+        try // Our best at email
         {
             var a = await AuthState;
             var userEmail = a.User.FindFirstValue(ClaimTypes.Email);
@@ -381,16 +399,16 @@ else
             client.Host = "smtp.gmail.com";
             client.EnableSsl = true;
             client.Port = 587; // 25, 587, 5432, 465
-            //client.Send(newMail);
+                               //client.Send(newMail);
         }
         catch
         {
             ILogger l = LoggerFactory.CreateLogger<Program>();
-            l.LogError("No Email for the user");
+            l.LogError("No Email for the user"); // Log Error
         }
 
         ILogger logger = LoggerFactory.CreateLogger<Program>();
-        logger.LogInformation("The card was deleted");
+        logger.LogInformation("The card was deleted"); // Log Info
         return purchase;
     }
 
@@ -427,10 +445,11 @@ else
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
         await dbContext.SaveChangesAsync();
         ILogger logger = LoggerFactory.CreateLogger<Program>();
-        logger.LogInformation("The card was deleted");
+        logger.LogInformation("The card was deleted"); // Info
     }
     private void HandleCoupon()
     {
+        ILogger logger = LoggerFactory.CreateLogger<Program>();
         if (coupon is not null)
         {
             IsBusy = true;
@@ -451,11 +470,16 @@ else
             }
             else
             {
+                logger.LogWarning("No coupon according to your code"); // Waring
                 isValidCoupon = false;
                 couponTotal = 0;
             }
 
             IsBusy = false;
+        }
+        else
+        {
+            logger.LogError("Coupon code was null"); // Error
         }
     }
 
