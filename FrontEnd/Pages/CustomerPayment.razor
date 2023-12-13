@@ -3,9 +3,10 @@
 @using FrontEnd.Pages.Dto;
 @using System.Security.Claims;
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Mail;
 @inject IDbContextFactory<FoodBoxDB> ContextFactory
 @inject NavigationManager NavigationManager
-@inject ILogger<CustomerPayment> Logger
+@inject ILoggerFactory LoggerFactory
 
 <h3>Your Order: </h3>
 @if (cart is not null && cart.CartItems.Count() > 0)
@@ -362,15 +363,33 @@ else
         dbcontext.PurchaseItems.AddRange(purchaseItems);
         await dbcontext.SaveChangesAsync();
 
-        var a = await AuthState;
-        var userEmail = a.User.FindFirstValue(ClaimTypes.Email);
+        try
+        {
+            var a = await AuthState;
+            var userEmail = a.User.FindFirstValue(ClaimTypes.Email);
 
-        EmailSending.Email email = new EmailSending.Email();
-        email.SendEmail(userEmail);
+            MailMessage newMail = new();
+            SmtpClient client = new(userEmail);
+            newMail.From = new MailAddress("foodbox401@gmail.com", "FoodBox");
+            newMail.To.Add(userEmail);
+            newMail.Subject = "FoodBox Reciept";
+            newMail.IsBodyHtml = true;
+            newMail.Body = "<h1> Thanks for ordering from us!! </h1>";
+            client.Credentials = new System.Net.NetworkCredential("foodbox401@gmail.com", "B@ckendrox"); // Cannot work because it does not trust google
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.Host = "smtp.gmail.com";
+            client.EnableSsl = true;
+            client.Port = 587; // 25, 587, 5432, 465
+            client.Send(newMail);
+        }
+        catch
+        {
+            ILogger l = LoggerFactory.CreateLogger<Program>();
+            l.LogError("No Email for the user");
+        }
 
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        ILogger logger = factory.CreateLogger<Program>();
-        logger.LogInformation("The card was deleted", "fun");
+        ILogger logger = LoggerFactory.CreateLogger<Program>();
+        logger.LogInformation("The card was deleted");
         return purchase;
     }
 
@@ -406,7 +425,8 @@ else
         using var dbContext = ContextFactory.CreateDbContext();
         await dbContext.CartItems.Where(ci => ci.CartId == cart.Id).ExecuteDeleteAsync();
         await dbContext.SaveChangesAsync();
-        Logger.LogInformation("Cart deletion successful.");
+        ILogger logger = LoggerFactory.CreateLogger<Program>();
+        logger.LogInformation("The card was deleted");
     }
     private void HandleCoupon()
     {
