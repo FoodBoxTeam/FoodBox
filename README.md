@@ -10,7 +10,3 @@ Although this website's goal is to be professional and ready to be put on the ma
 
 # Why log in?
 You can see your order history, change your favorite orders/items and when you refresh the page/leave/go to a diffrent computer, your order will still be there!
-
-# Want to see favorites and previous orders from the start?
-email: employee1@snow.edu
-password: P@ssword1
